@@ -5,7 +5,7 @@ import { notNull, sleep } from '../util/common';
 // Defintion of 'from' address.
 const accountAddr = process.env.ETH_FROM_ACCOUNT || web3.eth.coinbase;
 // Default price.
-const priceGas = process.env.ETH_DEPLOY_PRICE || 300000;
+const priceGas = process.env.ETH_DEPLOY_PRICE || 100000;
 // Default wait for block timeout.
 const blocksTimeout = process.env.ETH_WAIT_TIMEOUT || 30000;
 // Private key or password.
@@ -25,7 +25,7 @@ export function getContract(name: string) {
     if(_src.length < 50) {
         const cpath = `${process.cwd}/sol/${_src.trim()}`;
         if(fs.existsSync(cpath))
-            _src = fs.readFileSync(`${process.cwd}/sol/${_src.trim()}`, 'utf8');
+            _src = fs.readFileSync(cpath, 'utf8');
         else
             console.log(`Cannot read source for contract: <${name}>. Path ${cpath} doesn't exists!`);   
     }
