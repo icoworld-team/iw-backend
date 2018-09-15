@@ -58,7 +58,7 @@ const Types = gql(`
     type User {
         id: ID!
         name: String!
-        login: String!
+        login: String
         email: String!
         phone: String
         job: Employment
@@ -158,8 +158,9 @@ const Types = gql(`
         postId: ID!
         userId: ID!
         userName: String!
-        userLogin: String!
-        date: String!
+        userLogin: String
+        date: String
+        edited: String
         content: String!
         tags: [String!]!
     }
@@ -167,7 +168,7 @@ const Types = gql(`
     type PostEditResponse {
         postId: ID!
         userId: ID!
-        date: String!
+        date: String
         content: String!
         tags: [String!]!
     }
@@ -182,7 +183,7 @@ const Types = gql(`
         commentId: ID!
         userId: ID!
         userName: String!
-        userLogin: String!
+        userLogin: String
         date: String!
         edited: String!
         content: String!
