@@ -104,7 +104,10 @@ io.on('newMessage', async (ctx, data) => {
 });
 
 io.on('test', async (ctx, data) => {
-  ctx.socket.emit('test', data);
+  // ctx.socket.emit('test', data);
+  for (const socketObject of onlineUsers.values()) {
+    socketObject.emit('test', data);
+  }
 });
 
 export default io;
