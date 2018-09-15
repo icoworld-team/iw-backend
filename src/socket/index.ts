@@ -66,7 +66,7 @@ io.on('newMessage', async (ctx, data) => {
     const { text, partnerId } = data;
 
     const messageData = {
-      user_id: authorId,
+      userId: authorId,
       content: text
     };
     const message = await Message.create(messageData) as any;
@@ -86,7 +86,7 @@ io.on('newMessage', async (ctx, data) => {
       chatId: chat._id,
       messageId: message._id,
       read: message.read,
-      user_id: message.user_id,
+      userId: message.userId,
       content: message.content,
       date: message.date
     }
