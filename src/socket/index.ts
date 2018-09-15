@@ -42,11 +42,11 @@ io.use(async (ctx, next) => {
 })
 
 io.on('connection', async (ctx) => {
-  const socketId = ctx.socket.id;
   const cookieKey = 'sess:key';
   const userId = getSession(ctx.socket.request.headers.cookie, cookieKey);
   if (userId) {
-    onlineUsers.set(userId, socketId);
+    const socket = ctx.socket;
+    onlineUsers.set(userId, socket);
   }
 });
 
@@ -57,16 +57,16 @@ io.on('disconnect', async (ctx) => {
 });
 
 io.on('newMessage', async (ctx, data) => {
-  if (!ctx.state.isAuth) {
-    return;
-  }
-
   try {
+    if (!ctx.state.isAuth) {
+      throw new Error('User is not authenticated');
+    }
+
     const authorId = ctx.state.userId;
     const { text, partnerId } = data;
 
     const messageData = {
-      user_id: authorId,
+      userId: authorId,
       content: text
     };
     const message = await Message.create(messageData) as any;
@@ -86,14 +86,14 @@ io.on('newMessage', async (ctx, data) => {
       chatId: chat._id,
       messageId: message._id,
       read: message.read,
-      user_id: message.user_id,
+      userId: message.userId,
       content: message.content,
       date: message.date
     }
     
     if (onlineUsers.has(partnerId)) {
       const partnerSocket = onlineUsers.get(partnerId);
-      io.to(partnerSocket).emit('newMessage', response);
+      partnerSocket.emit('newMessage', response);
     }
 
     ctx.socket.emit('newMessage', response);
@@ -104,7 +104,10 @@ io.on('newMessage', async (ctx, data) => {
 });
 
 io.on('test', async (ctx, data) => {
-  ctx.socket.emit('test', data);
+  // ctx.socket.emit('test', data);
+  for (const socketObject of onlineUsers.values()) {
+    socketObject.emit('test', data);
+  }
 });
 
 export default io;
