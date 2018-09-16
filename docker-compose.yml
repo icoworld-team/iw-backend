@@ -22,7 +22,7 @@ services:
           NODE_URL: http://icoworld.projects.oktend.com:8545
           ETH_NODE_URL: http://icoworld.projects.oktend.com:8545
           ETH_PRIVATE_KEY: 123
-          ETH_FROM_ACCOUNT: 0xf1234b070814a4b834535d5f6cf7d3424ea84e43
+          ETH_FROM_ACCOUNT: "0xf1234b070814a4b834535d5f6cf7d3424ea84e43"
           PORT: 3000
           DB_URI: mongodb://db:27017/ico_world_db
       image: ico/backend:$BUILD_ID
