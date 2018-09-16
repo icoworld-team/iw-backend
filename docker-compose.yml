@@ -23,7 +23,7 @@ services:
           ETH_NODE_URL: http://icoworld.projects.oktend.com:8545
           ETH_PRIVATE_KEY: ""
           ETH_FROM_ACCOUNT: "0x007ccffb7916f37f7aeef05e8096ecfbe55afc2f"
-          ETH_DEPLOY_PRICE: 1000000000000
+          ETH_DEPLOY_PRICE: "20000000000000000000" 
           PORT: 3000
           DB_URI: mongodb://db:27017/ico_world_db
       image: ico/backend:$BUILD_ID
