@@ -1,5 +1,8 @@
 version: '2' 
 services:
+networks:
+  fluent_fluentd:
+    external: true
   
   #  proxy:
   #    build: ./nginx
@@ -14,6 +17,13 @@ services:
       - "/var/mongo-backup:/opt"
     restart: on-failure
     container_name: database
+    networks:
+      - fluent_fluentd
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: 172.30.0.10:24224
+        tag: mongo.log
   
   app:
       build:
@@ -30,3 +40,10 @@ services:
       container_name: backend-$BUILD_ID
       ports:
         - "3000:3000"
+      networks:
+        - fluent_fluentd
+      logging:
+        driver: "fluentd"
+        opitons:
+          fluentd-address: 172.30.0.10:24224
+          tag: backend.log
