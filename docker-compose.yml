@@ -44,6 +44,6 @@ services:
         - fluent_fluentd
       logging:
         driver: "fluentd"
-        opitons:
+        options:
           fluentd-address: 172.30.0.10:24224
           tag: backend.log
