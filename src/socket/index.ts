@@ -26,6 +26,7 @@ function getSession(cookies, cookieKey) {
 const io = new IO();
 
 io.use(async (ctx, next) => {
+  console.log('auth middleware');
   const cookieKey = 'sess:key';
   const userId = getSession(ctx.socket.socket.request.headers.cookie, cookieKey);
   if (userId) {
@@ -42,6 +43,7 @@ io.use(async (ctx, next) => {
 })
 
 io.on('connection', async (ctx) => {
+  console.log(`connected ${ctx.socket.id}`)
   const cookieKey = 'sess:key';
   const userId = getSession(ctx.socket.request.headers.cookie, cookieKey);
   if (userId) {
@@ -51,12 +53,19 @@ io.on('connection', async (ctx) => {
 });
 
 io.on('disconnect', async (ctx) => {
+  console.log(`disconnected ${ctx.socket.id}`)
   if (ctx.state.isAuth) {
     onlineUsers.delete(ctx.state.userId);
   }
 });
 
+io.on('error', (error) => {
+  console.log('error');
+  console.log(error);
+});
+
 io.on('newMessage', async (ctx, data) => {
+  console.log('event newMessage');
   try {
     if (!ctx.state.isAuth) {
       throw new Error('User is not authenticated');
@@ -64,6 +73,10 @@ io.on('newMessage', async (ctx, data) => {
 
     const authorId = ctx.state.userId;
     const { text, partnerId } = data;
+
+    console.log('authorId:', authorId);
+    console.log('text:', text);
+    console.log('partnerId:', partnerId);
 
     const messageData = {
       userId: authorId,
@@ -74,9 +87,12 @@ io.on('newMessage', async (ctx, data) => {
     let chat = await Chat.findOne({ members: { $all: [authorId, partnerId] } }) as any;
 
     if (!chat) {
+      console.log('creating chat');
       chat = await Chat.create({ members: [authorId, partnerId] });
       await User.findByIdAndUpdate(authorId, { $push: { chats: chat._id } });
       await User.findByIdAndUpdate(partnerId, { $push: { chats: chat._id } });
+    } else {
+      console.log('getting chat');
     }
 
     chat.messages.push(message._id);
@@ -92,14 +108,18 @@ io.on('newMessage', async (ctx, data) => {
     }
     
     if (onlineUsers.has(partnerId)) {
+      console.log(`partner ${partnerId} is online`);
       const partnerSocket = onlineUsers.get(partnerId);
       partnerSocket.emit('newMessage', response);
+    } else {
+      console.log(`partner ${partnerId} is offline`);
     }
 
     ctx.socket.emit('newMessage', response);
   } catch (error) {
+    console.log('error');
     console.log(error);
-    ctx.socket.emit('error', error);
+    // ctx.socket.emit('error', error);
   }
 });
 
