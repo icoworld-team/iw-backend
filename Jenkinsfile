@@ -12,7 +12,7 @@ pipeline {
                 echo "Build backend services........"
                 sh 'docker-compose build --no-cache app'
                 echo "Shut down backend and restart with new image"
-                sh 'docker stop $(docker ps | awk "/backend/{print $1}")'
+                sh 'docker ps -f name=backend -q | xargs -r docker container stop'
                 sh 'docker-compose up -d app'
                 echo "Waiting 10 seconds..."
                 sh 'sleep 10'
