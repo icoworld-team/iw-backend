@@ -10,6 +10,11 @@ const schema = new Schema({
         ref: 'User',
         required: true
     },
+    postId: {
+        type: ObjectId,
+        ref: 'Post',
+        required: true
+    },
     content: String,
 }, { timestamps: true });
 
@@ -18,6 +23,7 @@ export function getCommentData(item) {
     return {
         Id: item._id,
         userId: item.userId._id,
+        postId: item.postId._id,
         userName: item.userId.name,
         userLogin: item.userId.login,
         date: item.createdAt,

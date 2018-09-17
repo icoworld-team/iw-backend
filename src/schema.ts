@@ -28,6 +28,9 @@ const Mutation = gql(`
         createPost(input: PostInput!): Post!
         editPost(input: PostEditInput!): PostEditResponse!
         deletePost(postId: ID!): ID!
+        createComment(input: CommentInput!): Comment!
+        editComment(input: CommentEditInput!): ID!
+        deleteComment(cmtId: ID!): ID!
         createContract(input: ContractInput!): ID!
         deleteContract(id: ID!): ID!
     }
@@ -186,6 +189,17 @@ const Types = gql(`
         userLogin: String
         date: String!
         edited: String!
+        content: String!
+    }
+
+    input CommentInput {
+        userId: ID!
+        postId: ID!
+        content: String!
+    }
+
+    input CommentEditInput {
+        cmtId: ID!
         content: String!
     }
 

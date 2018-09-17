@@ -3,6 +3,7 @@ import Pool, { generatePoolName } from "../models/Pool";
 import Post, { getPostData, getPostDataForEditResponse } from "../models/Post";
 import { formatPoolData, getPoolData } from '../models/Pool';
 import Contract from "../models/Contract";
+import Comment, {getCommentData} from "../models/Comment";
 
 // Verify contract URL.
 const verifyContractLink = process.env.ETH_VERIFY_CONTRACT_URL || 'https://etherscan.io/verifyContract';
@@ -63,7 +64,6 @@ const MutationImpl = {
 
   editPost: async (_, { input }) => {
     const { postId, ...postData } = input;
-    postData.edited = Date.now();
     const updatedPost = await Post.findByIdAndUpdate(postId, postData, { new: true });
     return getPostDataForEditResponse(updatedPost);
   },
@@ -71,6 +71,28 @@ const MutationImpl = {
   deletePost: async (_, { postId }) => {
     const deletedPost = await Post.findByIdAndRemove(postId);
     return deletedPost._id;
+  },
+
+  createComment: async (_, { input: cmtData }) => {
+    const created = await Comment.create(cmtData) as any;
+    const post = await Post
+      .findById(created.postId)
+      .populate({
+        path: 'userId',
+        select: 'name login'
+      });
+    return getCommentData(post);
+  },
+
+  editComment: async (_, { input }) => {
+    const { cmtId, ...data } = input;
+    const updated = await Comment.findByIdAndUpdate(cmtId, data, { new: true });
+    return updated._id;
+  },
+
+  deleteComment: async (_, { cmtId }) => {
+    const removed = await Comment.findByIdAndRemove(cmtId);
+    return removed._id;
   },
 
   createContract: async (_, { input: input }) => {
