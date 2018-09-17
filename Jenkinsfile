@@ -10,17 +10,12 @@ pipeline {
                 sh 'export BUILD_ID=${BUILD_ID}'
                 echo "Build backend services with build number - ${env.BUILD_ID}........"
                 echo "Build backend services........"
-                sh 'docker-compose build --no-cache app backend-1 backend-2'
-                echo "Shut down backend-1 and restart with new image"
-                sh 'docker-compose stop backend-1'
-                sh 'docker-compose up -d --force-recreate backend-1'
+                sh 'docker-compose build --no-cache app'
+                echo "Shut down backend and restart with new image"
+                sh 'docker stop $(docker ps | awk "/backend/{print $1}")'
+                sh 'docker-compose up -d app'
                 echo "Waiting 10 seconds..."
                 sh 'sleep 10'
-                echo "Shut down backend-2 and restart with new image"
-                sh 'docker-compose stop backend-2'
-                sh 'docker-compose up -d --force-recreate backend-2'
-                echo "Start nginx proxy........."
-                sh 'docker-compose up -d proxy'
                 echo "FINISHED........"
             }
         }
