@@ -28,3 +28,5 @@ services:
           DB_URI: mongodb://db:27017/ico_world_db
       image: ico/backend:$BUILD_ID
       container_name: backend-$BUILD_ID
+      ports:
+        - "3000:3000"
