@@ -1,8 +1,8 @@
 version: '2' 
-services:
 networks:
   fluent_fluentd:
     external: true
+services:
   
   #  proxy:
   #    build: ./nginx
@@ -22,6 +22,8 @@ networks:
       options:
         fluentd-address: 172.30.0.10:24224
         tag: mongo.log
+    networks:
+      - fluent_fluentd
   
   app:
       build:
