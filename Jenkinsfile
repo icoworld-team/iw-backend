@@ -1,24 +1,61 @@
 pipeline {
-    agent any
-    stages {
-        stage('backend master Build') {
-            steps {
-                sh 'cp /var/icoworld/.env .'
-                echo "Start database............"
-                sh 'docker-compose up -d db'
-                echo "Export env"
-                sh 'export BUILD_ID=${BUILD_ID}'
-                echo "Build backend services with build number - ${env.BUILD_ID}........"
-                echo "Build backend services........"
-                sh 'docker-compose build --no-cache app'
-                echo "Shut down backend and restart with new image"
-                sh 'docker ps -f name=backend -q | xargs -r docker container stop'
-                sh 'docker-compose up -d app'
-                echo "Waiting 10 seconds..."
-                sh 'sleep 10'
-                echo "FINISHED........"
-            }
-        }
+  agent any
+  stages {
+    stage('Copy environment') {
+      steps {
+        sh 'cp /var/icoworld/.env-fork ./.env'
+      }
     }
-}
 
+    stage('Set BUILD_ID') {
+      steps {
+        sh 'export BUILD_ID=${BUILD_ID}'
+      }
+    }
+
+    stage('Start database') {
+      steps{
+        echo "Starting db..."
+        sh 'docker-compose up -d db'
+      }
+    }
+
+    stage('Build number - ${BUILD_ID}') {
+      steps {
+        sh 'docker-compose build --no-cache app'
+      }
+    }
+    
+    stage('Testing image ico/backend:${BUILD_ID}') {
+      steps {
+        sh('''#!/bin/bash
+          docker run --name backend-test-$BUILD_ID -d -p 5555:3000 ico/backend:$BUILD_ID && \\
+          sleep 10 && \\
+          RESPONSE=`curl localhost:3000` || exit 2
+          if [ \$RESPONSE != 'icoWorld' ]; then
+            echo "stopping container - ${BUILD_ID}"
+            docker ps -f name=backend-test -q | xargs -r docker container stop
+            echo "renaming container - ${BUILD_ID}"
+            docker rename backend-test-$BUILD_ID backend-test-$BUILD_ID_fail
+            echo "backend did not answer"
+            exit 1
+          else
+            echo "stopping container - ${BUILD_ID}"
+            docker stop backend-test-$BUILD_ID
+            echo "removing container - ${BUILD_ID}"
+            docker rm backend-test-$BUILD_ID
+          fi
+          ''')
+      }
+    }
+
+    stage('Deploy') {
+      steps {
+        sh('''#!/bin/bash
+          docker-compose stop app && \\
+          docker-compose up -d --force-recreate app
+          ''')
+      }
+    }
+  }
+}
