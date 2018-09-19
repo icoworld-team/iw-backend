@@ -49,7 +49,7 @@ pipeline {
       steps {
         sh('''#!/bin/bash
           docker-compose stop app && \\
-          docker-compose up -d --force-recreate app && \\
+          docker-compose up -d --force-recreate app
           ''')
       }
     }
