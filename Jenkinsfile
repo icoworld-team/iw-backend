@@ -33,12 +33,16 @@ pipeline {
           sleep 10 && \\
           RESPONSE=`curl localhost:3000` || exit 2
           if [ \$RESPONSE != 'icoWorld' ]; then
-            docker stop backend-test-$BUILD_ID
+            echo "stopping container - ${BUILD_ID}"
+            docker ps -f name=backend-test -q | xargs -r docker container stop
+            echo "renaming container - ${BUILD_ID}"
             docker rename backend-test-$BUILD_ID backend-test-$BUILD_ID_fail
             echo "backend did not answer"
             exit 1
           else
+            echo "stopping container - ${BUILD_ID}"
             docker stop backend-test-$BUILD_ID
+            echo "removing container - ${BUILD_ID}"
             docker rm backend-test-$BUILD_ID
           fi
           ''')
