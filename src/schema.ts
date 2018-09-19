@@ -198,8 +198,9 @@ const Types = gql(`
     }
 
     type Comment {
-        commentId: ID!
+        Id: ID!
         userId: ID!
+        postId: ID!
         userName: String!
         userLogin: String
         date: String!
