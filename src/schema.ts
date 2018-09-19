@@ -17,6 +17,8 @@ const Query = gql(`
         getComments(postId: ID!): [Comment]!
         getInvestors(input: InvestorsFilterParamsInput!): [Investor!]!
         getContracts(input: ContractsParamsInput!): [Contract]!
+        getChats(userId: ID!): [Chat!]!
+        getChatMessages(input: ChatInput!): [Message!]!
     }
 `);
 
@@ -261,6 +263,28 @@ const Types = gql(`
     input ContractsParamsInput {
         name: String
         description: String
+    }
+
+    type ChatUserData {
+        id: ID!
+        name: String!
+    }
+
+    type Message {
+        id: ID!
+        userId: ID!
+        content: String!
+        date: String!
+    }
+
+    type Chat {
+        parnter: ChatUserData!
+        lastMessage: Message!
+    }
+
+    input ChatInput {
+        chatId: ID!
+        skip: Int!
     }
 `);
 

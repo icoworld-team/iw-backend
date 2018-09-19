@@ -1,6 +1,6 @@
 version: '2' 
 networks:
-  fluent_fluentd:
+  efk_fluentd:
     external: true
 services:
   
@@ -23,7 +23,7 @@ services:
         fluentd-address: 172.30.0.10:24224
         tag: mongo.log
     networks:
-      - fluent_fluentd
+      - efk_fluentd 
   
   app:
       build:
@@ -41,7 +41,7 @@ services:
       ports:
         - "3000:3000"
       networks:
-        - fluent_fluentd
+        - efk_fluentd 
       logging:
         driver: "fluentd"
         options:

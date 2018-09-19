@@ -7,6 +7,8 @@ import * as postHelpers from './helpers/posts'
 import Contract from "../models/Contract";
 import Comment, { getCommentData } from "../models/Comment";
 import { getRepostData } from "../models/RePost";
+import Chat, { formatChatData } from "../models/Chat";
+import Message, { formatMessageData } from "../models/Message";
 
 // Query methods implementation.
 const QueryImpl = {
@@ -122,6 +124,39 @@ const QueryImpl = {
     }
     const contracts = await Contract.find(params);
     return contracts;
+  },
+
+  getChats: async (_, { userId }) => {
+    const user = await User.findById(userId) as any;
+    const chats = await Chat.find().where('_id').in(user.chats)
+      .populate({
+        path: 'members',
+        select: 'name'
+      })
+      .populate({
+        path: 'messages',
+        select: '_id userId content date'
+      })
+      .sort({ date: -1 });
+
+    const mappedChats = chats.map(chat => formatChatData(chat, userId));
+    return mappedChats;
+  },
+
+  getChatMessages: async (_ , { input }) => {    
+    const { chatId, skip } = input;
+    const limit = 10;
+    const chat = await Chat.findById(chatId) as any;
+    const messages = await Message.find().where('_id').in(chat.messages)
+      .populate({
+        path: 'messages',
+        select: '_id userId content date'
+      })
+      .sort({ date: 1 })
+      .skip(skip)
+      .limit(limit);
+
+    return messages.map(message => formatMessageData(message));
   }
 }
 
