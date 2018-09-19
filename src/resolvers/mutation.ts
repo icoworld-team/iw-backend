@@ -42,8 +42,8 @@ const MutationImpl = {
 
   followUser: async (_, { input }) => {
     const { userId, fanId } = input;
-    const updatedUser = await User.findByIdAndUpdate(userId, { $push: { subscribers: fanId } }, { upsert: true});
-    const updatedFan = await User.findByIdAndUpdate(fanId, { $push: { follows: userId } }, { upsert: true });
+    const updatedUser = await User.findByIdAndUpdate(userId, { $push: { subscribers: fanId } });
+    const updatedFan = await User.findByIdAndUpdate(fanId, { $push: { follows: userId } });
     return updatedFan._id;
   },
 
@@ -85,7 +85,7 @@ const MutationImpl = {
   likePost: async (_, { input }) => {
     const { userId, postId, like } = input;
     const updatedPost = like
-            ? await Post.findByIdAndUpdate(postId, { $push: { likes: userId } }, { upsert:true, new: true }) as any
+            ? await Post.findByIdAndUpdate(postId, { $push: { likes: userId } }, { new: true }) as any
             : await Post.findByIdAndUpdate(postId, { $pull: { likes: userId } }, { new: true }) as any
     return updatedPost.likes.length;
   },
@@ -93,7 +93,7 @@ const MutationImpl = {
   createComment: async (_, { input }) => {
     const { postId } = input;
     const comment = await Comment.create(input) as any;
-    const post = await Post.findByIdAndUpdate(postId, { $push: { comments: comment._id } }, { upsert:true });
+    const post = await Post.findByIdAndUpdate(postId, { $push: { comments: comment._id } });
     return getCommentData(comment);
   },
 
