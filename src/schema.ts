@@ -279,6 +279,7 @@ const Types = gql(`
     }
 
     type Chat {
+        chatId: ID!
         parnter: ChatUserData!
         lastMessage: Message!
     }

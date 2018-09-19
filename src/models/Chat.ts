@@ -21,6 +21,7 @@ export function formatChatData(chat, userId) {
     const lastMessage = chat.messages[0];
     const parnter = chat.members.filter(member => member._id.toString() !== userId)[0];
     return {
+        chatId: chat._id,
         parnter: formatPartnerData(parnter),
         lastMessage: formatMessageData(lastMessage)
     }
