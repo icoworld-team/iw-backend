@@ -135,9 +135,13 @@ const QueryImpl = {
       })
       .populate({
         path: 'messages',
-        select: '_id userId content date'
+        select: '_id userId content date',
+        populate: {
+          path: 'userId',
+          select: 'name'
+        } 
       })
-      .sort({ date: -1 });
+      .slice('messages', -1);
 
     const mappedChats = chats.map(chat => formatChatData(chat, userId));
     return mappedChats;
@@ -149,10 +153,10 @@ const QueryImpl = {
     const chat = await Chat.findById(chatId) as any;
     const messages = await Message.find().where('_id').in(chat.messages)
       .populate({
-        path: 'messages',
-        select: '_id userId content date'
+        path: 'userId',
+        select: 'name'
       })
-      .sort({ date: 1 })
+      .sort({ date: -1 })
       .skip(skip)
       .limit(limit);
 
