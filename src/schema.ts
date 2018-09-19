@@ -17,6 +17,8 @@ const Query = gql(`
         getComments(postId: ID!): [Comment]!
         getInvestors(input: InvestorsFilterParamsInput!): [Investor!]!
         getContracts(input: ContractsParamsInput!): [Contract]!
+        getChats(userId: ID!): [Chat!]!
+        getChatMessages(input: ChatInput!): [Message!]!
     }
 `);
 
@@ -24,10 +26,13 @@ const Query = gql(`
 const Mutation = gql(`
     type Mutation {
         updateUser(input: UserInput!): User!
+        deleteUser(id: ID!): ID!
+        followUser(input: FollowUserInput!): ID!
         createPool(input: PoolInput!): PoolCreateResponse!
         createPost(input: PostInput!): Post!
         editPost(input: PostEditInput!): PostEditResponse!
         deletePost(postId: ID!): ID!
+        likePost(input: PostLikeInput!): Int!
         createComment(input: CommentInput!): Comment!
         editComment(input: CommentEditInput!): ID!
         deleteComment(cmtId: ID!): ID!
@@ -97,7 +102,11 @@ const Types = gql(`
         city: String
         job: EmploymentInput
         clinks: CLinksInput
-        follows: [ID!]
+    }
+
+    input FollowUserInput {
+        userId: ID!
+        fanId: ID!
     }
 
     input PoolInput {
@@ -182,6 +191,12 @@ const Types = gql(`
         tags: [String!]
     }
 
+    input PostLikeInput {
+        userId: ID!
+        postId: ID!
+        like: Boolean!
+    }
+
     type Comment {
         commentId: ID!
         userId: ID!
@@ -248,6 +263,28 @@ const Types = gql(`
     input ContractsParamsInput {
         name: String
         description: String
+    }
+
+    type ChatUserData {
+        id: ID!
+        name: String!
+    }
+
+    type Message {
+        id: ID!
+        userId: ID!
+        content: String!
+        date: String!
+    }
+
+    type Chat {
+        parnter: ChatUserData!
+        lastMessage: Message!
+    }
+
+    input ChatInput {
+        chatId: ID!
+        skip: Int!
     }
 `);
 
