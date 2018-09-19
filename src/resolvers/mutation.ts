@@ -16,10 +16,7 @@ const MutationImpl = {
     user._id = user._id.toString();
     return user;
   },
-  removeUser: async (parent, args) => {
-    const user = await User.findByIdAndRemove({where: args.id});
-    return user;
-  }, */
+ */
 
   /* upload: async (parent, { file }) => {
       const { stream, filename, mimetype, encoding } = await file;
@@ -36,6 +33,18 @@ const MutationImpl = {
     const { id, ...userData } = input;
     const updatedUser = await User.findByIdAndUpdate(id, userData, { new: true });
     return updatedUser;
+  },
+
+  deleteUser: async (_, { Id }) => {
+    const removed = await User.findByIdAndRemove(Id);
+    return removed._id;
+  },
+
+  followUser: async (_, { input }) => {
+    const { userId, fanId } = input;
+    const updatedUser = await User.findByIdAndUpdate(userId, { $push: { subscribers: fanId } }, { upsert: true});
+    const updatedFan = await User.findByIdAndUpdate(fanId, { $push: { follows: userId } }, { upsert: true });
+    return updatedFan._id;
   },
 
   createPool: async (_, { input }) => {
@@ -73,15 +82,19 @@ const MutationImpl = {
     return deletedPost._id;
   },
 
-  createComment: async (_, { input: cmtData }) => {
-    const created = await Comment.create(cmtData) as any;
-    const post = await Post
-      .findById(created.postId)
-      .populate({
-        path: 'userId',
-        select: 'name login'
-      });
-    return getCommentData(post);
+  likePost: async (_, { input }) => {
+    const { userId, postId, like } = input;
+    const updatedPost = like
+            ? await Post.findByIdAndUpdate(postId, { $push: { likes: userId } }, { upsert:true, new: true }) as any
+            : await Post.findByIdAndUpdate(postId, { $pull: { likes: userId } }, { new: true }) as any
+    return updatedPost.likes.length;
+  },
+
+  createComment: async (_, { input }) => {
+    const { postId } = input;
+    const comment = await Comment.create(input) as any;
+    const post = await Post.findByIdAndUpdate(postId, { $push: { comments: comment._id } }, { upsert:true });
+    return getCommentData(comment);
   },
 
   editComment: async (_, { input }) => {

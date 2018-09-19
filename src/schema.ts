@@ -24,10 +24,13 @@ const Query = gql(`
 const Mutation = gql(`
     type Mutation {
         updateUser(input: UserInput!): User!
+        deleteUser(id: ID!): ID!
+        followUser(input: FollowUserInput!): ID!
         createPool(input: PoolInput!): PoolCreateResponse!
         createPost(input: PostInput!): Post!
         editPost(input: PostEditInput!): PostEditResponse!
         deletePost(postId: ID!): ID!
+        likePost(input: PostLikeInput!): Int!
         createComment(input: CommentInput!): Comment!
         editComment(input: CommentEditInput!): ID!
         deleteComment(cmtId: ID!): ID!
@@ -97,7 +100,11 @@ const Types = gql(`
         city: String
         job: EmploymentInput
         clinks: CLinksInput
-        follows: [ID!]
+    }
+
+    input FollowUserInput {
+        userId: ID!
+        fanId: ID!
     }
 
     input PoolInput {
@@ -180,6 +187,12 @@ const Types = gql(`
         postId: ID!,
         content: String!
         tags: [String!]
+    }
+
+    input PostLikeInput {
+        userId: ID!
+        postId: ID!
+        like: Boolean!
     }
 
     type Comment {
