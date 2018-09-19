@@ -273,12 +273,13 @@ const Types = gql(`
 
     type Message {
         id: ID!
-        userId: ID!
+        author: ChatUserData!
         content: String!
         date: String!
     }
 
     type Chat {
+        chatId: ID!
         parnter: ChatUserData!
         lastMessage: Message!
     }

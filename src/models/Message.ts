@@ -25,10 +25,13 @@ const schema = new Schema({
 });
 
 export function formatMessageData(message) {
-    const { _id, userId, content, date } = message;
+    const { _id, userId: user, content, date } = message;
     return {
         id: _id,
-        userId,
+        author: {
+            id: user._id,
+            name: user.name
+        },
         content,
         date
     }
