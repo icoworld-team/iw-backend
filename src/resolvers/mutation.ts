@@ -91,14 +91,11 @@ const MutationImpl = {
   },
 
   createComment: async (_, { input }) => {
-    const { postId } = input;
+    const { userId, postId } = input;
     const comment = await Comment.create(input) as any;
-    const post = await Post.findByIdAndUpdate(postId, { $push: { comments: comment._id } })
-    .populate({
-      path: 'userId',
-      select: 'name login'
-    }) as any;
-    return getCommentData(comment, post.userId.name, post.userId.login);
+    const user = await User.findById(userId).select({ name: 1, login: 1 }) as any;
+    const post = await Post.findByIdAndUpdate(postId, { $push: { comments: comment._id } });
+    return getCommentData(comment, user.name, user.login);
   },
 
   editComment: async (_, { input }) => {

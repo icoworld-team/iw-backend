@@ -82,8 +82,12 @@ const QueryImpl = {
 
   getComments: async (_, { postId }) => {
     const post = await Post.findById(postId) as any;
-    const comments = await Comment.find().where('_id').in(post.comments);
-    return comments.map((cmt => getCommentData(cmt)));
+    const comments = await Comment.find().where('_id').in(post.comments)
+    .populate({
+      path: 'userId',
+      select: 'name login'
+    }) as any;
+    return comments.map((cmt => getCommentData(cmt, cmt.userId.name, cmt.userId.login)));
   },
 
   getInvestors: async (_, { input }) => {
