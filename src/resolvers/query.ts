@@ -7,7 +7,7 @@ import * as postHelpers from './helpers/posts'
 import Contract from "../models/Contract";
 import Comment, { getCommentData } from "../models/Comment";
 import { getRepostData } from "../models/RePost";
-import Chat, { formatChatData } from "../models/Chat";
+import Chat, { formatChatDataWithLastMessage } from "../models/Chat";
 import Message, { formatMessageData } from "../models/Message";
 
 // Query methods implementation.
@@ -147,7 +147,7 @@ const QueryImpl = {
       })
       .slice('messages', -1);
 
-    const mappedChats = chats.map(chat => formatChatData(chat, userId));
+    const mappedChats = chats.map(chat => formatChatDataWithLastMessage(chat, userId));
     return mappedChats;
   },
 

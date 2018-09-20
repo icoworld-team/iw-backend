@@ -1,6 +1,6 @@
 import IO = require('koa-socket-2');
 import Message from '../models/Message';
-import Chat from '../models/Chat';
+import Chat, { formatChatData } from '../models/Chat';
 import User from '../models/user';
 import * as cookie from 'cookie';
 
@@ -85,8 +85,9 @@ io.on('newMessage', async (ctx, data) => {
     const message = await Message.create(messageData) as any;
 
     let chat = await Chat.findOne({ members: { $all: [authorId, partnerId] } }) as any;
+    let isChatExist = !!chat;
 
-    if (!chat) {
+    if (!isChatExist) {
       console.log('creating chat');
       chat = await Chat.create({ members: [authorId, partnerId] });
       await User.findByIdAndUpdate(authorId, { $push: { chats: chat._id } });
@@ -98,7 +99,19 @@ io.on('newMessage', async (ctx, data) => {
     chat.messages.push(message._id);
     await chat.save();
 
-    const response = {
+    let newChatResponse;
+
+    if (!isChatExist) {
+      const chatData = await Chat.findById(chat._id)
+        .populate({
+          path: 'members',
+          select: 'name'
+        })
+
+      newChatResponse = formatChatData(chatData, authorId);
+    }
+
+    const newMessageResponse = {
       chatId: chat._id,
       messageId: message._id,
       read: message.read,
@@ -110,12 +123,18 @@ io.on('newMessage', async (ctx, data) => {
     if (onlineUsers.has(partnerId)) {
       console.log(`partner ${partnerId} is online`);
       const partnerSocket = onlineUsers.get(partnerId);
-      partnerSocket.emit('newMessage', response);
+      if (!isChatExist) {
+        partnerSocket.emit('newChat', newChatResponse);
+      }
+      partnerSocket.emit('newMessage', newMessageResponse);
     } else {
       console.log(`partner ${partnerId} is offline`);
     }
 
-    ctx.socket.emit('newMessage', response);
+    if (!isChatExist) {
+      ctx.socket.emit('newChat', newChatResponse);
+    }
+    ctx.socket.emit('newMessage', newMessageResponse);
   } catch (error) {
     console.log('error');
     console.log(error);
@@ -124,10 +143,7 @@ io.on('newMessage', async (ctx, data) => {
 });
 
 io.on('test', async (ctx, data) => {
-  // ctx.socket.emit('test', data);
-  for (const socketObject of onlineUsers.values()) {
-    socketObject.emit('test', data);
-  }
+  ctx.socket.emit('test', data);
 });
 
 export default io;
