@@ -25,7 +25,7 @@ const schema = new Schema({
 });
 
 export function formatMessageData(message) {
-    const { _id, userId: user, content, date } = message;
+    const { _id, userId: user, content, read, date } = message;
     return {
         id: _id,
         author: {
@@ -33,6 +33,7 @@ export function formatMessageData(message) {
             name: user.name
         },
         content,
+        read,
         date
     }
 }

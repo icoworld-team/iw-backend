@@ -139,7 +139,7 @@ const QueryImpl = {
       })
       .populate({
         path: 'messages',
-        select: '_id userId content date',
+        select: 'userId content read date',
         populate: {
           path: 'userId',
           select: 'name'
