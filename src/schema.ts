@@ -33,6 +33,7 @@ const Mutation = gql(`
         editPost(input: PostEditInput!): PostEditResponse!
         deletePost(postId: ID!): ID!
         likePost(input: PostLikeInput!): Int!
+        rePost(userId: ID!, postId: ID!): Int!
         createComment(input: CommentInput!): Comment!
         editComment(input: CommentEditInput!): ID!
         deleteComment(cmtId: ID!): ID!

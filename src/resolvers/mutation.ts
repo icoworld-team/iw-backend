@@ -90,6 +90,12 @@ const MutationImpl = {
     return updatedPost.likes.length;
   },
 
+  rePost: async (_, { userId, postId}) => {
+    const updated = await User.findByIdAndUpdate(userId, { $push: { reposts: postId } }, { new: true })
+    .select('reposts') as any;
+    return updated.reposts.length;
+  },
+
   createComment: async (_, { input }) => {
     const { userId, postId } = input;
     const comment = await Comment.create(input) as any;
