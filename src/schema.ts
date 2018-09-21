@@ -276,6 +276,7 @@ const Types = gql(`
         id: ID!
         author: ChatUserData!
         content: String!
+        read: Boolean!
         date: String!
     }
 
