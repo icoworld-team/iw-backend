@@ -1,6 +1,10 @@
 export function generateSearchingParamsObject(filteredParams) {
   const result = {} as any;
 
+  if (filteredParams.name !== undefined) {
+    result.name = new RegExp(`.*${filteredParams.name}.*`, 'i');
+  }
+
   if (filteredParams.country !== undefined) {
     result.country = filteredParams.country;
   }
@@ -28,6 +32,8 @@ export function generateSortingParamsObj(sortBy) {
   switch (sortBy) {
     case 'NUMBER_OF_FOLLOWERS':
       return { follows: -1 };
+    case 'REGISTRATION_DATE':
+      return { createdAt: -1 };
     /*
     case 'CAPITAL_AMOUNT':
       return {};
