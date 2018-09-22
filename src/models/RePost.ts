@@ -4,7 +4,11 @@ const Schema = mongoose.Schema;
 const ObjectId = Schema.Types.ObjectId;
 
 // Repost schema definition.
-const RePost = new Schema({
+const schema = new Schema({
+    userId: {
+        type: ObjectId,
+        ref: 'User'
+    },
     postId: {
         type: ObjectId,
         ref: 'Post'
@@ -31,4 +35,4 @@ export function getRepostData(post, rdate) {
     }
 }
 
-export default RePost;
+export default mongoose.model('RePost', schema);

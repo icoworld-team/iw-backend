@@ -25,6 +25,12 @@ const Query = gql(`
 // Mutation definition.
 const Mutation = gql(`
     type Mutation {
+        addWallet(userId:ID!, addr:String!): ID!
+        removeWallet(userId:ID!, id:ID!): Boolean!
+        addEducation(input: ExpirienceInput!): ID!
+        removeEducation(userId:ID!, id:ID!): Boolean!
+        addJob(input:ExpirienceInput!): ID!
+        removeJob(userId:ID!, id:ID!): Boolean!
         updateUser(input: UserInput!): User!
         deleteUser(id: ID!): ID!
         followUser(input: FollowUserInput!): ID!
@@ -50,9 +56,16 @@ const Types = gql(`
         encoding: String!
     }
 
-    type Employment {
-        company: String!
-        position: String!
+    type Wallet {
+        id: ID!
+        kind: String!
+        address: String
+    }
+
+    type Expirience {
+        name: String!
+        from: String!
+        to: String
     }
 
     type Clinks {
@@ -70,12 +83,21 @@ const Types = gql(`
         login: String
         email: String!
         phone: String
-        job: Employment
         country: String
         city: String
-        education: String
         clinks: Clinks
-        follows: [ID!]
+        educations: [Expirience]
+        jobs: [Expirience]
+        wallets: [Wallet]
+        notifications: Boolean
+        language: String
+    }
+
+    input ExpirienceInput {
+        userId: ID!
+        name: String!
+        from: String!
+        to: String
     }
 
     input CLinksInput {

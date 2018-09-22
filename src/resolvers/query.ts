@@ -38,7 +38,7 @@ const QueryImpl = {
   },
 
   getPools: async (_, { userId }) => {
-    const user = await User.findById(userId) as any;
+    const user = await User.findById(userId).select('pools') as any;
     const pools = await Pool.find().where('_id').in(user.pools);
     return pools.map((pool => getPoolData(pool)));
   },
@@ -66,7 +66,7 @@ const QueryImpl = {
   },
 
   getReposts: async (_, { userId }) => {
-    const user = await User.findById(userId) as any;
+    const user = await User.findById(userId).select('reposts') as any;
     const repsMap = new Map();
     user.reposts.forEach(item => {
       repsMap.set(item.postId, item.date);
@@ -106,14 +106,14 @@ const QueryImpl = {
   getFollows: async (_, { userId }) => {
     const user = await User.findById(userId) as any;
     const users = await User.find().where('_id').in(user.follows)
-      .select({ name: 1, login: 1, avatar: 1, location: 1 });
+      .select('name login avatar');
     return users.map((usr => getShortUserData(usr)));
   },
 
   getSubscribers: async (_, { userId }) => {
     const user = await User.findById(userId) as any;
     const users = await User.find().where('_id').in(user.subscribers)
-      .select({ name: 1, login: 1, avatar: 1, location: 1 });
+      .select('name login avatar');
     return users.map((usr => getShortUserData(usr)));
   },
 

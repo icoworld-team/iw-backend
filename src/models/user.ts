@@ -1,23 +1,11 @@
 import mongoose = require('mongoose');
 import {Image} from './Image';
 import Wallet from './Wallet';
+import Expirience from './Expirience';
 import {Roles, getPermission} from '../auth/permissions';
-import RePost from './RePost';
 
 const Schema = mongoose.Schema;
 const ObjectId = Schema.Types.ObjectId;
-
-// Employment schema definition.
-const Employment = new Schema({
-    company: {
-        type: String,
-        required: true
-    },
-    position: {
-        type: String,
-        required: true
-    }
-});
 
 // User schema definition.
 const schema = new Schema({
@@ -45,12 +33,12 @@ const schema = new Schema({
         default: Roles.Guest
     },
     phone: String,
-    job: Employment,
     photo: Image,
     avatar: Image,
     country: String,
     city: String,
-    education: String,
+    jobs: [Expirience],
+    educations: [Expirience],
     clinks: {
         fb: {
             type: String,
@@ -81,7 +69,10 @@ const schema = new Schema({
         type: ObjectId,
         ref: 'Post'
     }],
-    reposts: [RePost],
+    reposts: [{
+        type: ObjectId,
+        ref: 'RePost'
+    }],
     pools: [{
         type: ObjectId,
         ref: 'Pool'
@@ -121,6 +112,7 @@ schema.set('toJSON', {
 export function setUserRole(user) {
     user.role = Roles.User;
 }
+
 // Compose user object properties for UI
 export function getShortUserData(user) {
     return {
@@ -128,7 +120,7 @@ export function getShortUserData(user) {
         name: user.name,
         login: user.login,
         avatar: user.avatar,
-        location: user.location,
+        country: user.country,
     }
 }
 // Compose user object properties for UI
@@ -141,11 +133,13 @@ export function getUserData(user) {
         role: user.role,
         permissions: getPermission(user.role),
         phone: user.phone,
-        job: user.job,
         photo: user.photo,
         avatar: user.avatar,
-        location: user.location,
+        country: user.country,
+        city: user.city,
         clinks: user.clinks,
+        educations: user.educations,
+        jobs: user.jobs,
         wallets: user.wallets,
         notifications: user.notifications,
         language: user.language

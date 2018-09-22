@@ -4,6 +4,7 @@ import Post, { getPostData, getPostDataForEditResponse } from "../models/Post";
 import { formatPoolData, getPoolData } from '../models/Pool';
 import Contract from "../models/Contract";
 import Comment, {getCommentData} from "../models/Comment";
+import Wallet from "../models/Wallet";
 
 // Verify contract URL.
 const verifyContractLink = process.env.ETH_VERIFY_CONTRACT_URL || 'https://etherscan.io/verifyContract';
@@ -28,6 +29,47 @@ const MutationImpl = {
 
       return { filename, mimetype, encoding };
   }, */
+
+  addWallet: async (_, { userId, addr}) => {
+    const user = await User.findById(userId).select('wallets') as any;
+    const wallet = user.wallets.create({address: addr});
+    user.wallets.push(wallet);
+    return wallet._id;
+  },
+
+  removeWallet: async (_, { userId, id}) => {
+    const user = await User.findById(userId).select('wallets') as any;
+    user.wallets.pull(id);
+    return true;
+  },
+
+  addEducation: async (_, { input }) => {
+    const {userId, name:_name, _from, _to} = input;
+    const user = await User.findById(userId).select('educations') as any;
+    const obj = user.educations.create({name: _name, from: _from, to: _to});
+    user.educations.push(obj);
+    return obj._id;
+  },
+
+  removeEducation: async (_, { userId, id}) => {
+    const user = await User.findById(userId).select('educations') as any;
+    user.educations.pull(id);
+    return true;
+  },
+
+  addJob: async (_, { input }) => {
+    const {userId, _name, _from, _to} = input;
+    const user = await User.findById(userId).select('jobs') as any;
+    const obj = user.jobs.create({name: _name, from: _from, to: _to});
+    user.jobs.push(obj);
+    return obj._id;
+  },
+
+  removeJob: async (_, { userId, id}) => {
+    const user = await User.findById(userId).select('jobs') as any;
+    user.jobs.pull(id);
+    return true;
+  },
 
   updateUser: async (_, { input }) => {
     const { id, ...userData } = input;

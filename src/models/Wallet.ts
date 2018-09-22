@@ -1,7 +1,7 @@
 import mongoose = require('mongoose');
 
 // Wallet schema definition.
-const schema = new mongoose.Schema({
+const Wallet = new mongoose.Schema({
     kind: {
         type: String,
         default: 'ETH'
@@ -9,4 +9,4 @@ const schema = new mongoose.Schema({
     address: String,
 });
 
-export default schema;
+export default Wallet;
