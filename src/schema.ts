@@ -12,7 +12,8 @@ const Query = gql(`
         getPools(userId: ID!): [Pool]!
         searchPool(poolName: String!): [PoolInfo!]!
         getPost(postId: ID!): Post
-        searchPost(input: PostSearchingParamsInput!): [Post!]!
+        searchPost(searchText: String!): [Post!]!
+        searchPostInProfile(userId: ID!, searchText: String!): SearchPostInProfileResponse!
         getReposts(userId: ID!): [Post]!
         getComments(postId: ID!): [Comment]!
         getInvestors(input: InvestorsFilterParamsInput!): [Investor!]!
@@ -163,11 +164,6 @@ const Types = gql(`
         poolName: String!
     }
 
-    input PostSearchingParamsInput {
-        searchText: String
-        userId: ID
-    }
-
     type PoolInfo {
         poolId: String!
         poolName: String!
@@ -212,6 +208,23 @@ const Types = gql(`
         userId: ID!
         postId: ID!
         like: Boolean!
+    }
+
+    type Repost {
+        postId: ID!
+        userId: ID!
+        userName: String!
+        userLogin: String
+        date: String
+        edited: String
+        content: String!
+        tags: [String!]!
+        reposted: String
+    }
+
+    type SearchPostInProfileResponse {
+        posts: [Post!]!
+        reposts: [Repost!]!
     }
 
     type Comment {

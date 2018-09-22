@@ -5,6 +5,7 @@ import { formatPoolData, getPoolData } from '../models/Pool';
 import Contract from "../models/Contract";
 import Comment, {getCommentData} from "../models/Comment";
 import Wallet from "../models/Wallet";
+import RePost from "../models/RePost";
 
 // Verify contract URL.
 const verifyContractLink = process.env.ETH_VERIFY_CONTRACT_URL || 'https://etherscan.io/verifyContract';
@@ -104,6 +105,7 @@ const MutationImpl = {
 
   createPost: async (_, { input: postData }) => {
     const createdPost = await Post.create(postData);
+    await User.findByIdAndUpdate(postData.userId, { $push: { posts: createdPost._id } });
     const post = await Post
       .findById(createdPost._id)
       .populate({
@@ -132,9 +134,11 @@ const MutationImpl = {
     return updatedPost.likes.length;
   },
 
-  rePost: async (_, { userId, postId}) => {
-    const updated = await User.findByIdAndUpdate(userId, { $push: { reposts: postId } }, { new: true })
-    .select('reposts') as any;
+  rePost: async (_, { userId, postId }) => {
+    const repostData = { userId, postId };
+    const repost = await RePost.create(repostData);
+    const updated = await User.findByIdAndUpdate(userId, { $push: { reposts: repost._id } }, { new: true })
+      .select('reposts') as any;
     return updated.reposts.length;
   },
 

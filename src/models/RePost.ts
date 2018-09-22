@@ -26,11 +26,10 @@ export function getRepostData(post, rdate) {
         userId: post.userId._id,
         userName: post.userId.name,
         userLogin: post.userId.login,
-        userAvatar: post.userId.avatar,
-        date: post.date,
-        edited: post.edited,
+        date: post.createdAt,
+        edited: post.updatedAt,
         content: post.content,
-        tags: post.postId.tags,
+        tags: post.tags,
         reposted: rdate
     }
 }

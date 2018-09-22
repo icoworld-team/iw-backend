@@ -12,7 +12,10 @@ const schema = new Schema({
         required: true
     },
     content: String,
-    reposted: Number,
+    reposted: {
+        type: Number,
+        default: 0
+    },
     comments: [{
         type: ObjectId,
         ref: 'Comment'
