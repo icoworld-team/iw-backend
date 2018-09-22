@@ -78,11 +78,6 @@ const Types = gql(`
         follows: [ID!]
     }
 
-    input EmploymentInput {
-        company: String!
-        position: String!
-    }
-
     input CLinksInput {
         fb: String
         linkedin: String
@@ -97,12 +92,11 @@ const Types = gql(`
         login: String
         name: String
         email: String
-        education: String
         phone: String
         country: String
         city: String
-        job: EmploymentInput
         clinks: CLinksInput
+        language: String
     }
 
     input FollowUserInput {
