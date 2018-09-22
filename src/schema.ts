@@ -221,6 +221,7 @@ const Types = gql(`
     }
 
     input InvestorsFilterParamsInput {
+        name: String
         country: String
         followersRangeFilter: FollowersRangeFilter
         sortBy: SORTING_PARAMS
@@ -232,6 +233,7 @@ const Types = gql(`
     }
 
     enum SORTING_PARAMS {
+        REGISTRATION_DATE
         NUMBER_OF_FOLLOWERS
         CAPITAL_AMOUNT
         PROFIT_LEVEL
