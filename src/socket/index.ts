@@ -78,6 +78,8 @@ io.on('newMessage', async (ctx, data) => {
     console.log('text:', text);
     console.log('partnerId:', partnerId);
 
+    const author = await User.findById(authorId).select('name') as any;
+
     const messageData = {
       userId: authorId,
       content: text
@@ -109,13 +111,28 @@ io.on('newMessage', async (ctx, data) => {
         })
 
       newChatResponse = formatChatData(chatData, authorId);
+
+      // for test
+      newChatResponse.lastMessage = {
+        id: message._id,
+        author: {
+          id: authorId,
+          name: author.name
+        },
+        content: message.content,
+        read: message.read,
+        date: message.date
+      }
     }
 
     const newMessageResponse = {
       chatId: chat._id,
       messageId: message._id,
       read: message.read,
-      userId: message.userId,
+      author: {
+        id: authorId,
+        name: author.name
+      },
       content: message.content,
       date: message.date
     }

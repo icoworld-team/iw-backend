@@ -82,7 +82,7 @@ const QueryImpl = {
     const repostedPosts = await Post.find({ content: new RegExp(`.*${searchText}.*`, 'i') }).where('_id').in(ids)
       .populate({
         path: 'userId',
-        select: 'name login avatar'
+        select: 'name login'
       });
     const mappedReposted = repostedPosts.map(post => getRepostData(post, repsMap.get(post._id.toString())));
 
