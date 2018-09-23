@@ -20,6 +20,7 @@ const Query = gql(`
         getContracts(input: ContractsParamsInput!): [Contract]!
         getChats(userId: ID!): [Chat!]!
         getChatMessages(input: ChatInput!): [Message!]!
+        searchChat(userId: ID!, searchText: String!): [Chat!]!
     }
 `);
 

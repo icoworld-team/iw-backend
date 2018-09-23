@@ -192,7 +192,16 @@ const QueryImpl = {
       .limit(limit);
 
     return messages.map(message => formatMessageData(message));
-  }
+  },
+
+  searchChat: async (_, { userId, searchText }) => {
+    const chats = await this.default.getChats(null, { userId });
+    const filteredChats = chats.filter(chat => {
+      const regexp = new RegExp(`.*${searchText}.*`, 'i');
+      return regexp.test(chat.parnter.name);
+    });
+    return filteredChats;
+  },
 }
 
 export default QueryImpl;
