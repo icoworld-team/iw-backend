@@ -101,7 +101,7 @@ io.on('newMessage', async (ctx, data) => {
     chat.messages.push(message._id);
     await chat.save();
 
-    let newChatResponse;
+    let newChatResponseToAuthor, newChatResponseToPartner;
 
     if (!isChatExist) {
       const chatData = await Chat.findById(chat._id)
@@ -110,10 +110,10 @@ io.on('newMessage', async (ctx, data) => {
           select: 'name'
         })
 
-      newChatResponse = formatChatData(chatData, authorId);
+      newChatResponseToAuthor = formatChatData(chatData, authorId);
+      newChatResponseToPartner = formatChatData(chatData, partnerId);
 
-      // for test
-      newChatResponse.lastMessage = {
+      const lastMessage = {
         id: message._id,
         author: {
           id: authorId,
@@ -122,7 +122,10 @@ io.on('newMessage', async (ctx, data) => {
         content: message.content,
         read: message.read,
         date: message.date
-      }
+      };
+      
+      newChatResponseToAuthor.lastMessage = lastMessage;
+      newChatResponseToPartner.lastMessage = lastMessage;
     }
 
     const newMessageResponse = {
@@ -141,7 +144,7 @@ io.on('newMessage', async (ctx, data) => {
       console.log(`partner ${partnerId} is online`);
       const partnerSocket = onlineUsers.get(partnerId);
       if (!isChatExist) {
-        partnerSocket.emit('newChat', newChatResponse);
+        partnerSocket.emit('newChat', newChatResponseToPartner);
       } else {
         partnerSocket.emit('newMessage', newMessageResponse);
       }
@@ -150,7 +153,7 @@ io.on('newMessage', async (ctx, data) => {
     }
 
     if (!isChatExist) {
-      ctx.socket.emit('newChat', newChatResponse);
+      ctx.socket.emit('newChat', newChatResponseToAuthor);
     } else {
       ctx.socket.emit('newMessage', newMessageResponse);
     }
