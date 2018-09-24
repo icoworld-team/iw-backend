@@ -142,16 +142,18 @@ io.on('newMessage', async (ctx, data) => {
       const partnerSocket = onlineUsers.get(partnerId);
       if (!isChatExist) {
         partnerSocket.emit('newChat', newChatResponse);
+      } else {
+        partnerSocket.emit('newMessage', newMessageResponse);
       }
-      partnerSocket.emit('newMessage', newMessageResponse);
     } else {
       console.log(`partner ${partnerId} is offline`);
     }
 
     if (!isChatExist) {
       ctx.socket.emit('newChat', newChatResponse);
+    } else {
+      ctx.socket.emit('newMessage', newMessageResponse);
     }
-    ctx.socket.emit('newMessage', newMessageResponse);
   } catch (error) {
     console.log('error');
     console.log(error);
