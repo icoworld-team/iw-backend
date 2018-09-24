@@ -8,6 +8,8 @@ const Query = gql(`
         getUser(userId: ID!): User
         getFollows(userId: ID!): [User]!
         getSubscribers(userId: ID!): [User]!
+        getPMSenders(userId: ID!): [User]!
+        getCommenters(userId: ID!): [User]!
         getPool(poolId: ID!): Pool
         getPools(userId: ID!): [Pool]!
         searchPool(poolName: String!): [PoolInfo!]!
@@ -33,7 +35,12 @@ const Mutation = gql(`
         removeJob(userId:ID!, id:ID!): Boolean!
         updateUser(input: UserInput!): User!
         deleteUser(id: ID!): ID!
-        followUser(input: FollowUserInput!): ID!
+        followUser(userId: ID!, fanId: ID!): ID!
+        unfollowUser(userId: ID!, fanId: ID!): Boolean!
+        addPMSender(userId: ID!, id: ID!): Boolean!
+        removePMSender(userId: ID!, id: ID!): Boolean!
+        addCommenter(userId: ID!, id: ID!): Boolean!
+        removeCommenter(userId: ID!, id: ID!): Boolean!
         createPool(input: PoolInput!): PoolCreateResponse!
         createPost(input: PostInput!): Post!
         editPost(input: PostEditInput!): PostEditResponse!
@@ -118,12 +125,8 @@ const Types = gql(`
         country: String
         city: String
         clinks: CLinksInput
+        twoFactorAuth: Boolean
         language: String
-    }
-
-    input FollowUserInput {
-        userId: ID!
-        fanId: ID!
     }
 
     input PoolInput {

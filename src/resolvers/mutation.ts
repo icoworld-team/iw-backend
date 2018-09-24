@@ -82,11 +82,36 @@ const MutationImpl = {
     return removed._id;
   },
 
-  followUser: async (_, { input }) => {
-    const { userId, fanId } = input;
+  followUser: async (_, { userId, fanId }) => {
     const updatedUser = await User.findByIdAndUpdate(userId, { $push: { subscribers: fanId } });
     const updatedFan = await User.findByIdAndUpdate(fanId, { $push: { follows: userId } });
     return updatedFan._id;
+  },
+
+  unfollowUser: async (_, { userId, fanId }) => {
+    const updatedUser = await User.findByIdAndUpdate(userId, { $pull: { subscribers: fanId } });
+    const updatedFan = await User.findByIdAndUpdate(fanId, { $pull: { follows: userId } });
+    return true;
+  },
+
+  addPMSender: async (_, { userId, id }) => {
+    const updated = await User.findByIdAndUpdate(userId, { $push: { pmsenders: id } });
+    return true;
+  },
+
+  removePMSender: async (_, { userId, id }) => {
+    const updated = await User.findByIdAndUpdate(userId, { $pull: { pmsenders: id } });
+    return true;
+  },
+
+  addCommenter: async (_, { userId, id }) => {
+    const updated = await User.findByIdAndUpdate(userId, { $push: { commenters: id } });
+    return true;
+  },
+
+  removeCommenter: async (_, { userId, id }) => {
+    const updated = await User.findByIdAndUpdate(userId, { $pull: { commenters: id } });
+    return true;
   },
 
   createPool: async (_, { input }) => {

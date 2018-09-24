@@ -90,6 +90,18 @@ const schema = new Schema({
         type: ObjectId,
         ref: 'User'
     }],
+    pmsenders: [{
+        type: ObjectId,
+        ref: 'User'
+    }],
+    commenters: [{
+        type: ObjectId,
+        ref: 'User'
+    }],
+    twoFactorAuth: {
+        type: Boolean,
+        default: false
+    },
     notifications: {
         type: Boolean,
         default: false
@@ -141,6 +153,7 @@ export function getUserData(user) {
         educations: user.educations,
         jobs: user.jobs,
         wallets: user.wallets,
+        twoFactorAuth: user.twoFactorAuth,
         notifications: user.notifications,
         language: user.language
     }

@@ -117,6 +117,20 @@ const QueryImpl = {
     return users.map((usr => getShortUserData(usr)));
   },
 
+  getPMSenders: async (_, { userId }) => {
+    const user = await User.findById(userId) as any;
+    const users = await User.find().where('_id').in(user.pmsenders)
+      .select('name login avatar');
+    return users.map((usr => getShortUserData(usr)));
+  },
+
+  getCommenters: async (_, { userId }) => {
+    const user = await User.findById(userId) as any;
+    const users = await User.find().where('_id').in(user.commenters)
+      .select('name login avatar');
+    return users.map((usr => getShortUserData(usr)));
+  },
+
   getContracts: async (_, { input }) => {
     const { name, description, address } = input;
     const params = {} as any;
