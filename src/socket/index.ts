@@ -78,6 +78,8 @@ io.on('newMessage', async (ctx, data) => {
     console.log('text:', text);
     console.log('partnerId:', partnerId);
 
+    const author = await User.findById(authorId).select('name') as any;
+
     const messageData = {
       userId: authorId,
       content: text
@@ -99,7 +101,7 @@ io.on('newMessage', async (ctx, data) => {
     chat.messages.push(message._id);
     await chat.save();
 
-    let newChatResponse;
+    let newChatResponseToAuthor, newChatResponseToPartner;
 
     if (!isChatExist) {
       const chatData = await Chat.findById(chat._id)
@@ -108,14 +110,32 @@ io.on('newMessage', async (ctx, data) => {
           select: 'name'
         })
 
-      newChatResponse = formatChatData(chatData, authorId);
+      newChatResponseToAuthor = formatChatData(chatData, authorId);
+      newChatResponseToPartner = formatChatData(chatData, partnerId);
+
+      const lastMessage = {
+        id: message._id,
+        author: {
+          id: authorId,
+          name: author.name
+        },
+        content: message.content,
+        read: message.read,
+        date: message.date
+      };
+      
+      newChatResponseToAuthor.lastMessage = lastMessage;
+      newChatResponseToPartner.lastMessage = lastMessage;
     }
 
     const newMessageResponse = {
       chatId: chat._id,
       messageId: message._id,
       read: message.read,
-      userId: message.userId,
+      author: {
+        id: authorId,
+        name: author.name
+      },
       content: message.content,
       date: message.date
     }
@@ -124,17 +144,19 @@ io.on('newMessage', async (ctx, data) => {
       console.log(`partner ${partnerId} is online`);
       const partnerSocket = onlineUsers.get(partnerId);
       if (!isChatExist) {
-        partnerSocket.emit('newChat', newChatResponse);
+        partnerSocket.emit('newChat', newChatResponseToPartner);
+      } else {
+        partnerSocket.emit('newMessage', newMessageResponse);
       }
-      partnerSocket.emit('newMessage', newMessageResponse);
     } else {
       console.log(`partner ${partnerId} is offline`);
     }
 
     if (!isChatExist) {
-      ctx.socket.emit('newChat', newChatResponse);
+      ctx.socket.emit('newChat', newChatResponseToAuthor);
+    } else {
+      ctx.socket.emit('newMessage', newMessageResponse);
     }
-    ctx.socket.emit('newMessage', newMessageResponse);
   } catch (error) {
     console.log('error');
     console.log(error);

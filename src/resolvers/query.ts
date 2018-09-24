@@ -3,12 +3,13 @@ import Pool from "../models/Pool";
 import { getPoolData, getPoolDataForSearchResult } from '../models/Pool';
 import Post, { getPostData } from "../models/Post";
 import * as investorHelpers from './helpers/investor';
-import * as postHelpers from './helpers/posts'
+// import * as postHelpers from './helpers/posts'
 import Contract from "../models/Contract";
 import Comment, { getCommentData } from "../models/Comment";
 import { getRepostData } from "../models/RePost";
 import Chat, { formatChatDataWithLastMessage } from "../models/Chat";
 import Message, { formatMessageData } from "../models/Message";
+import RePost from "../models/RePost";
 
 // Query methods implementation.
 const QueryImpl = {
@@ -53,16 +54,42 @@ const QueryImpl = {
     return post ? getPostData(post) : null;
   },
 
-  searchPost: async (_, { input }) => {
-    const searchingParamsObject = postHelpers.generateSearchingParamsObject(input);
-
+  searchPost: async (_, { searchText }) => {
     const posts = await Post
-      .find(searchingParamsObject)
+      .find({ content: new RegExp(`.*${searchText}.*`, 'i') })
       .populate({
         path: 'userId',
         select: 'name login'
       });
     return posts.map((post => getPostData(post)));
+  },
+
+  searchPostInProfile: async (_, { userId, searchText }) => {
+    const user = await User.findById(userId).select('posts reposts') as any;
+    const posts = await Post.find({ content: new RegExp(`.*${searchText}.*`, 'i') }).where('_id').in(user.posts)
+      .populate({
+        path: 'userId',
+        select: 'name login'
+      });    
+    const mappedPosts = posts.map(post => getPostData(post));
+
+    const reposts = await RePost.find().where('_id').in(user.reposts).select('postId date') as any;
+    const repsMap = new Map();
+    reposts.forEach(item => {
+      repsMap.set(item.postId.toString(), item.date);
+    });
+    const ids = Array.from(repsMap.keys());
+    const repostedPosts = await Post.find({ content: new RegExp(`.*${searchText}.*`, 'i') }).where('_id').in(ids)
+      .populate({
+        path: 'userId',
+        select: 'name login'
+      });
+    const mappedReposted = repostedPosts.map(post => getRepostData(post, repsMap.get(post._id.toString())));
+
+    return {
+      posts: mappedPosts,
+      reposts: mappedReposted
+    }
   },
 
   getReposts: async (_, { userId }) => {
@@ -179,7 +206,16 @@ const QueryImpl = {
       .limit(limit);
 
     return messages.map(message => formatMessageData(message));
-  }
+  },
+
+  searchChat: async (_, { userId, searchText }) => {
+    const chats = await this.default.getChats(null, { userId });
+    const filteredChats = chats.filter(chat => {
+      const regexp = new RegExp(`.*${searchText}.*`, 'i');
+      return regexp.test(chat.parnter.name);
+    });
+    return filteredChats;
+  },
 }
 
 export default QueryImpl;
