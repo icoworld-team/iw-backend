@@ -6,6 +6,7 @@ import Contract from "../models/Contract";
 import Comment, {getCommentData} from "../models/Comment";
 import Wallet from "../models/Wallet";
 import RePost from "../models/RePost";
+import News from "../models/News";
 
 // Verify contract URL.
 const verifyContractLink = process.env.ETH_VERIFY_CONTRACT_URL || 'https://etherscan.io/verifyContract';
@@ -199,6 +200,16 @@ const MutationImpl = {
   deleteContract: async (_, { Id }) => {
     const contract = await Contract.findByIdAndRemove(Id);
     return contract._id;
+  },
+
+  createNews: async (_, { title }) => {
+    const createdNews = await News.create({ title });
+    return createdNews._id;
+  },
+
+  deleteNews: async (_, { newsId }) => {
+    const deletedNews = await News.findByIdAndRemove(newsId);
+    return deletedNews._id;
   },
 }
 

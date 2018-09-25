@@ -10,6 +10,7 @@ import { getRepostData } from "../models/RePost";
 import Chat, { formatChatDataWithLastMessage } from "../models/Chat";
 import Message, { formatMessageData } from "../models/Message";
 import RePost from "../models/RePost";
+import News, { getNewsData } from "../models/News";
 
 // Query methods implementation.
 const QueryImpl = {
@@ -231,6 +232,11 @@ const QueryImpl = {
       return regexp.test(chat.parnter.name);
     });
     return filteredChats;
+  },
+
+  getNews: async () => {
+    const news = await News.find();
+    return news.map(newsItem => getNewsData(newsItem));
   },
 }
 
