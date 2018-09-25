@@ -10,6 +10,8 @@ const Query = gql(`
         getSubscribers(userId: ID!): [User]!
         getPMSenders(userId: ID!): [User]!
         getCommenters(userId: ID!): [User]!
+        getTopUsers(flag: Boolean!): [User]!
+        isTopUser(userId: ID!): Boolean!
         getPool(poolId: ID!): Pool
         getPools(userId: ID!): [Pool]!
         searchPool(poolName: String!): [PoolInfo!]!
@@ -17,6 +19,7 @@ const Query = gql(`
         searchPost(searchText: String!): [Post!]!
         searchPostInProfile(userId: ID!, searchText: String!): SearchPostInProfileResponse!
         getReposts(userId: ID!): [Post]!
+        getFollowsPosts(userId: ID!): [Post]!
         getComments(postId: ID!): [Comment]!
         getInvestors(input: InvestorsFilterParamsInput!): [Investor!]!
         getContracts(input: ContractsParamsInput!): [Contract]!
@@ -43,6 +46,7 @@ const Mutation = gql(`
         removePMSender(userId: ID!, id: ID!): Boolean!
         addCommenter(userId: ID!, id: ID!): Boolean!
         removeCommenter(userId: ID!, id: ID!): Boolean!
+        makeTopUser(userId: ID!, flag: Boolean!): Boolean!
         createPool(input: PoolInput!): PoolCreateResponse!
         createPost(input: PostInput!): Post!
         editPost(input: PostEditInput!): PostEditResponse!

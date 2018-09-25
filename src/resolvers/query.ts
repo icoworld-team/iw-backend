@@ -107,6 +107,12 @@ const QueryImpl = {
     return posts.map(post => getRepostData(post, repsMap.get(post._id)));
   },
 
+  getFollowsPosts: async (_, { userId }) => {
+    const user = await User.findById(userId).select('follows') as any;
+    const posts = await Post.find().where('_id').in(user.follows);
+    return posts.map(post => getPostData(post));
+  },
+
   getComments: async (_, { postId }) => {
     const post = await Post.findById(postId) as any;
     const comments = await Comment.find().where('_id').in(post.comments)
@@ -156,6 +162,16 @@ const QueryImpl = {
     const users = await User.find().where('_id').in(user.commenters)
       .select('name login avatar');
     return users.map((usr => getShortUserData(usr)));
+  },
+
+  getTopUsers: async (_, {flag}) => {
+    const users = await User.find({top: flag});
+    return users.map((usr => getShortUserData(usr)));
+  },
+
+  isTopUser: async (_, { userId }) => {
+    const user = await User.findById(userId).select('top') as any;
+    return user ? user.top : false;
   },
 
   getContracts: async (_, { input }) => {

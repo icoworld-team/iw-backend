@@ -106,6 +106,10 @@ const schema = new Schema({
         type: Boolean,
         default: false
     },
+    top: {
+        type: Boolean,
+        default: false
+    },
     language: {
         type: String,
         enum: ['en', 'ru', 'cn'],
@@ -133,6 +137,7 @@ export function getShortUserData(user) {
         login: user.login,
         avatar: user.avatar,
         country: user.country,
+        top: user.top
     }
 }
 // Compose user object properties for UI
@@ -155,6 +160,7 @@ export function getUserData(user) {
         wallets: user.wallets,
         twoFactorAuth: user.twoFactorAuth,
         notifications: user.notifications,
+        top: user.top,
         language: user.language
     }
 }

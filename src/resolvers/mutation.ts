@@ -115,6 +115,11 @@ const MutationImpl = {
     return true;
   },
 
+  makeTopUser: async (_, { userId, flag }) => {
+    const updated = await User.findByIdAndUpdate(userId, { top: flag } );
+    return flag;
+  },
+  
   createPool: async (_, { input }) => {
     // deploy contract
     // save contract's information in db
