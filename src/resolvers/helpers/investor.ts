@@ -28,22 +28,20 @@ export function generateSearchingParamsObject(filteredParams) {
   return result;
 }
 
-export function generateSortingParamsObj(sortBy) {
+export function sortInvestors(investors, sortBy) {
   switch (sortBy) {
     case 'NUMBER_OF_FOLLOWERS':
-      return { follows: -1 };
+      return investors.sort((investors1, investors2) => investors2.subscribers.length - investors1.subscribers.length);
     case 'REGISTRATION_DATE':
-      return { createdAt: -1 };
-    /*
-    case 'CAPITAL_AMOUNT':
+      return investors.sort((investors1, investors2) => investors2.createdAt - investors1.createdAt);
+    /* case 'CAPITAL_AMOUNT':
       return {};
     case 'PROFIT_LEVEL':
       return {};
     case 'PERCENTAGE_OF_PROFITABLE_INVESTMENTS':
-      return {};
-    */
+      return {}; */   
     default:
-      return {};
+      return investors;
   }
 }
 
@@ -53,6 +51,6 @@ export function formatInvestor(investor) {
       id: investor._id,
       name: investor.name,
       login: investor.login,
-      countOfFollowers: investor.follows.length
+      countOfFollowers: investor.subscribers.length
   }
 }

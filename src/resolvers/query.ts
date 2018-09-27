@@ -127,13 +127,11 @@ const QueryImpl = {
   getInvestors: async (_, { input }) => {
     const { sortBy, ...filterParams } = input;
     const searchingParamsObject = investorHelpers.generateSearchingParamsObject(filterParams);
-    const sortingParams = investorHelpers.generateSortingParamsObj(sortBy);
     const investors = await User
       .find(searchingParamsObject)
-      .sort(sortingParams)
-      .select({ name: 1, follows: 1, login: 1 });
-
-    const formattedInvestors = investors.map(investor => investorHelpers.formatInvestor(investor));
+      .select({ name: 1, subscribers: 1, login: 1, createdAt: 1 });
+    const sortedInvestors = investorHelpers.sortInvestors(investors, sortBy);
+    const formattedInvestors = sortedInvestors.map(investor => investorHelpers.formatInvestor(investor));
     return formattedInvestors;
   },
 
