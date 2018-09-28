@@ -10,6 +10,7 @@ import { getRepostData } from "../models/RePost";
 import Chat, { formatChatDataWithLastMessage } from "../models/Chat";
 import Message, { formatMessageData } from "../models/Message";
 import RePost from "../models/RePost";
+import News, { getNewsData } from "../models/News";
 
 // Query methods implementation.
 const QueryImpl = {
@@ -130,13 +131,11 @@ const QueryImpl = {
   getInvestors: async (_, { input }) => {
     const { sortBy, ...filterParams } = input;
     const searchingParamsObject = investorHelpers.generateSearchingParamsObject(filterParams);
-    const sortingParams = investorHelpers.generateSortingParamsObj(sortBy);
     const investors = await User
       .find(searchingParamsObject)
-      .sort(sortingParams)
-      .select({ name: 1, follows: 1, login: 1 });
-
-    const formattedInvestors = investors.map(investor => investorHelpers.formatInvestor(investor));
+      .select({ name: 1, subscribers: 1, login: 1, createdAt: 1 });
+    const sortedInvestors = investorHelpers.sortInvestors(investors, sortBy);
+    const formattedInvestors = sortedInvestors.map(investor => investorHelpers.formatInvestor(investor));
     return formattedInvestors;
   },
 
@@ -235,6 +234,11 @@ const QueryImpl = {
       return regexp.test(chat.parnter.name);
     });
     return filteredChats;
+  },
+
+  getNews: async () => {
+    const news = await News.find();
+    return news.map(newsItem => getNewsData(newsItem));
   },
 }
 

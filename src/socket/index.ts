@@ -164,6 +164,16 @@ io.on('newMessage', async (ctx, data) => {
   }
 });
 
+io.on('readMessage', async (ctx, data) => {
+  const { messageIds, partnerId } = data;
+  await Message.updateMany({ _id: { $in: messageIds } }, { read: true });
+  if (onlineUsers.has(partnerId)) {
+    const partnerSocket = onlineUsers.get(partnerId);
+    partnerSocket.emit('readMessage', messageIds);
+  }
+  ctx.socket.emit('readMessage', messageIds);
+});
+
 io.on('test', async (ctx, data) => {
   ctx.socket.emit('test', data);
 });

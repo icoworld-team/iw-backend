@@ -9,7 +9,7 @@ const ObjectId = Schema.Types.ObjectId;
 // User schema definition.
 const schema = new Schema({
     name: {
-        type: String, 
+        type: String,
         required: true
     },
     login: String,
@@ -20,11 +20,11 @@ const schema = new Schema({
     email: {
         type: String,
         required: true,
-        unique: true,
-        index: {
+        unique: true
+        /* index: {
             unique: true,
             sparse: true
-        }
+        } */
     },
     role: {
         type: String,

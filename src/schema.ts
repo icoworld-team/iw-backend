@@ -26,6 +26,7 @@ const Query = gql(`
         getChats(userId: ID!): [Chat!]!
         getChatMessages(input: ChatInput!): [Message!]!
         searchChat(userId: ID!, searchText: String!): [Chat!]!
+        getNews: [News!]!
     }
 `);
 
@@ -60,6 +61,8 @@ const Mutation = gql(`
         deleteComment(cmtId: ID!): ID!
         createContract(input: ContractInput!): ID!
         deleteContract(id: ID!): ID!
+        createNews(title: String!): ID!
+        deleteNews(newsId: ID!): ID!
     }
 `);
 
@@ -332,6 +335,12 @@ const Types = gql(`
     input ChatInput {
         chatId: ID!
         skip: Int!
+    }
+
+    type News {
+        id: ID!
+        title: String!
+        date: String!
     }
 `);
 
