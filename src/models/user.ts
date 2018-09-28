@@ -10,13 +10,10 @@ const ObjectId = Schema.Types.ObjectId;
 // User schema definition.
 const schema = new Schema({
     name: {
-        type: String, 
+        type: String,
         required: true
     },
-    login: {
-        type: String,
-        // unique: true
-    },
+    login: String,
     pwd: {
         type: Buffer,  
         required: true
@@ -35,10 +32,7 @@ const schema = new Schema({
         enum: [Roles.Guest, Roles.User, Roles.Admin],
         default: Roles.Guest
     },
-    phone: {
-        type: String,
-        // unique: true
-    },
+    phone: String,
     photo: Image,
     avatar: Image,
     country: String,
