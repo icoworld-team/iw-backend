@@ -13,7 +13,10 @@ const schema = new Schema({
         type: String, 
         required: true
     },
-    login: String,
+    login: {
+        type: String,
+        // unique: true
+    },
     pwd: {
         type: Buffer,  
         required: true
@@ -21,18 +24,21 @@ const schema = new Schema({
     email: {
         type: String,
         required: true,
-        unique: true,
-        index: {
+        unique: true
+        /* index: {
             unique: true,
             sparse: true
-        }
+        } */
     },
     role: {
         type: String,
         enum: [Roles.Guest, Roles.User, Roles.Admin],
         default: Roles.Guest
     },
-    phone: String,
+    phone: {
+        type: String,
+        // unique: true
+    },
     photo: Image,
     avatar: Image,
     country: String,

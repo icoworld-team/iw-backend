@@ -26,9 +26,15 @@ export function close() {
 	});
 }
 
-export default () => {
+export default async () => {
 	db.on('error', (error) => { throw new Error(`Failed to connect to DB: ${error}`) })
 		.on('close', () => console.log('DB connection closed.'))
 		.once('open', () => console.log('Established connection to DB.'));
-	return mongoose.connect(DB_URI, dbOptions);
+	
+	const dbObj = await mongoose.connect(DB_URI, dbOptions);
+	const modelNames = ['User'];
+	modelNames.forEach(async (modelName) => {
+		await mongoose.models[modelName].ensureIndexes();
+	})
+	return dbObj;
 };
