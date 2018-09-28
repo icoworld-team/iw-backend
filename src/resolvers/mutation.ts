@@ -6,6 +6,7 @@ import Contract from "../models/Contract";
 import Comment, {getCommentData} from "../models/Comment";
 import Wallet from "../models/Wallet";
 import RePost from "../models/RePost";
+import Image from "../models/Image";
 
 // Verify contract URL.
 const verifyContractLink = process.env.ETH_VERIFY_CONTRACT_URL || 'https://etherscan.io/verifyContract';
@@ -119,7 +120,7 @@ const MutationImpl = {
     const updated = await User.findByIdAndUpdate(userId, { top: flag } );
     return flag;
   },
-  
+
   createPool: async (_, { input }) => {
     // deploy contract
     // save contract's information in db
@@ -170,6 +171,19 @@ const MutationImpl = {
     const updated = await User.findByIdAndUpdate(userId, { $push: { reposts: repost._id } }, { new: true })
       .select('reposts') as any;
     return updated.reposts.length;
+  },
+
+  addImage: async (_, { postId, imageId }) => {
+    const post = await Post.findByIdAndUpdate(postId, { $push: { attachments: imageId } });
+    return true;
+  },
+
+  removeImage: async (_, { postId, imageId, del }) => {
+    const post = await Post.findByIdAndUpdate(postId, { $pull: { attachments: imageId } });
+    if(del) {
+      await Image.findByIdAndRemove(imageId);
+    }
+    return true;
   },
 
   createComment: async (_, { input }) => {

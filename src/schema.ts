@@ -53,6 +53,8 @@ const Mutation = gql(`
         deletePost(postId: ID!): ID!
         likePost(input: PostLikeInput!): Int!
         rePost(userId: ID!, postId: ID!): Int!
+        addImage(postId: ID, imageId: ID): Boolean!
+        removeImage(postId: ID, imageId: ID, del: Boolean): Boolean!
         createComment(input: CommentInput!): Comment!
         editComment(input: CommentEditInput!): ID!
         deleteComment(cmtId: ID!): ID!
@@ -128,6 +130,8 @@ const Types = gql(`
         name: String
         email: String
         phone: String
+        photo: ID
+        avatar: ID
         country: String
         city: String
         clinks: CLinksInput

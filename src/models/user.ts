@@ -1,5 +1,4 @@
 import mongoose = require('mongoose');
-import {Image} from './Image';
 import Wallet from './Wallet';
 import Expirience from './Expirience';
 import {Roles, getPermission} from '../auth/permissions';
@@ -33,8 +32,14 @@ const schema = new Schema({
         default: Roles.Guest
     },
     phone: String,
-    photo: Image,
-    avatar: Image,
+    photo: {
+        type: ObjectId,
+        ref: 'Image'
+    },
+    avatar:  {
+        type: ObjectId,
+        ref: 'Image'
+    },
     country: String,
     city: String,
     jobs: [Expirience],
