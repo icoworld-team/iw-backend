@@ -109,7 +109,11 @@ const QueryImpl = {
 
   getFollowsPosts: async (_, { userId }) => {
     const user = await User.findById(userId).select('follows') as any;
-    const posts = await Post.find().where('_id').in(user.follows);
+    const posts = await Post.find().where('userId').in(user.follows)
+    .populate({
+      path: 'userId',
+      select: 'name login avatar'
+    });
     return posts.map(post => getPostData(post));
   },
 
