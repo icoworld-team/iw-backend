@@ -76,6 +76,20 @@ const MutationImpl = {
 
   updateUser: async (_, { input }) => {
     const { id, ...userData } = input;
+    const login = userData['login'];
+    if (login) {
+      const user = await User.findOne({ login });
+      if (user && user._id.toString() !== id) {
+        throw new Error(`User with the same login already exists: ${login}`);
+      }
+    }
+    const phone = userData['phone'];
+    if (phone) {
+      const user = await User.findOne({ phone });
+      if (user && user._id.toString() !== id) {
+        throw new Error(`User with the same phone already exists: ${phone}`);
+      }
+    }
     const updatedUser = await User.findByIdAndUpdate(id, userData, { new: true });
     return updatedUser;
   },
