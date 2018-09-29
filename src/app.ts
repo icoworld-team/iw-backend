@@ -2,10 +2,9 @@ import * as Koa from 'koa';
 import * as session from 'koa-session';
 import * as passport from 'koa-passport';
 import * as Router from 'koa-router';
-import * as bodyParser from 'koa-body';
+import * as bodyParser from 'koa-bodyparser';
 import * as serve from 'koa-static';
 import * as cors from 'koa2-cors';
-import * as fs from 'fs';
 import * as path from 'path';
 import { Strategy as LocalStrategy } from 'passport-local'
 import { IWError } from './util/IWError';
@@ -13,25 +12,15 @@ import { hash, verify } from './auth/digest';
 import User, {setUserRole, getUserData} from './models/user';
 import {deployContract} from './eth/contracts';
 import admin from './admin';
-import Image from './models/Image';
 
 // Initialize of Koa application.
 const app = new Koa();
 const router = new Router();
 
-const MAXFILE_SIZE: number = parseInt(process.env.MAXFILE_SIZE) || 3242880;
 const STATIC_ROOT = path.join(process.env.STATIC_PATH || process.cwd(),'static');
-const UPLOAD_PATH = path.join(STATIC_ROOT, 'images');
 
 app.use(serve(STATIC_ROOT));
-app.use(bodyParser({
-    multipart: true,
-    urlencoded: true,
-    formidable: {
-        uploadDir: UPLOAD_PATH,
-        maxFileSize: MAXFILE_SIZE
-    }
-}));
+app.use(bodyParser());
 
 // cors
 app.use(cors({
@@ -172,28 +161,6 @@ router.post('/deploy', async (ctx: Koa.Context) => {
     }
 });
 
-// Upload image handler.
-router.post('/upload', async (ctx: Koa.Context) => {
-    try {
-        if(ctx.session == undefined || null)
-            throw new IWError(401, "Access denied");
-        // Check for a specific file property.   
-        const file = ctx.request.files['file'];
-        const userId = ctx.session.passport.user;
-        const user = await User.findById(userId);
-        const image = await Image.create({
-            userId: user._id,
-            filename: file.name,
-            format: file.type,
-            size: file.size
-        });
-        const fname = image._id.toString();    
-        fs.renameSync(file.path, path.join(UPLOAD_PATH, fname));
-        ctx.body = fname;
-    } catch(err) {
-        ctx.throw(err.status, err.message);
-    }
-});
 
 router.get('/', async (ctx: Koa.Context) => {
     ctx.body = 'icoWorld'
