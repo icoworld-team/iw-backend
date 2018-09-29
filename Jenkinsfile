@@ -22,7 +22,7 @@ pipeline {
 
     stage('Build') {
       steps {
-        sh 'docker-compose build --no-cache app 1>/var/jenkins/build_log/build-number_$BUILD_ID'
+        sh 'docker-compose build --no-cache app 1>/var/jenkins/buildlog/build-number_$BUILD_ID.txt'
       }
     }
     
