@@ -37,40 +37,46 @@ const MutationImpl = {
     const user = await User.findById(userId).select('wallets') as any;
     const wallet = user.wallets.create({address: addr});
     user.wallets.push(wallet);
+    user.save();
     return wallet._id;
   },
 
   removeWallet: async (_, { userId, id}) => {
     const user = await User.findById(userId).select('wallets') as any;
     user.wallets.pull(id);
+    user.save();
     return true;
   },
 
   addEducation: async (_, { input }) => {
-    const {userId, name:_name, _from, _to} = input;
+    const {userId, ...data} = input;
     const user = await User.findById(userId).select('educations') as any;
-    const obj = user.educations.create({name: _name, from: _from, to: _to});
+    const obj = user.educations.create(data);
     user.educations.push(obj);
+    user.save();
     return obj._id;
   },
 
   removeEducation: async (_, { userId, id}) => {
     const user = await User.findById(userId).select('educations') as any;
     user.educations.pull(id);
+    user.save();
     return true;
   },
 
   addJob: async (_, { input }) => {
-    const {userId, _name, _from, _to} = input;
+    const {userId, ...data} = input;
     const user = await User.findById(userId).select('jobs') as any;
-    const obj = user.jobs.create({name: _name, from: _from, to: _to});
+    const obj = user.jobs.create(data);
     user.jobs.push(obj);
+    user.save();
     return obj._id;
   },
 
   removeJob: async (_, { userId, id}) => {
     const user = await User.findById(userId).select('jobs') as any;
     user.jobs.pull(id);
+    user.save();
     return true;
   },
 

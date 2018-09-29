@@ -81,6 +81,7 @@ const Types = gql(`
     }
 
     type Expirience {
+        id: ID!
         name: String!
         from: String!
         to: String
