@@ -103,6 +103,7 @@ const Types = gql(`
         phone: String
         country: String
         city: String
+        site: String
         clinks: Clinks
         educations: [Expirience]
         jobs: [Expirience]
@@ -137,6 +138,7 @@ const Types = gql(`
         avatar: ID
         country: String
         city: String
+        site: String
         clinks: CLinksInput
         twoFactorAuth: Boolean
         language: String
@@ -202,7 +204,10 @@ const Types = gql(`
         date: String
         edited: String
         content: String!
+        comments: [ID]
+        likes: [ID]
         tags: [String!]!
+        attachments: [ID]
     }
 
     type PostEditResponse {

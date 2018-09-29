@@ -42,6 +42,7 @@ const schema = new Schema({
     },
     country: String,
     city: String,
+    site: String,
     jobs: [Expirience],
     educations: [Expirience],
     clinks: {
@@ -159,6 +160,7 @@ export function getUserData(user) {
         avatar: user.avatar,
         country: user.country,
         city: user.city,
+        site: user.site,
         clinks: user.clinks,
         educations: user.educations,
         jobs: user.jobs,
