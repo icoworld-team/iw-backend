@@ -20,9 +20,9 @@ pipeline {
       }
     }
 
-    stage('Build number - ${BUILD_ID}') {
+    stage('Build') {
       steps {
-        sh 'docker-compose build --no-cache app'
+        sh 'docker-compose build --no-cache app 2>/var/jenkins/build_log/build-number_$BUILD_ID'
       }
     }
     
