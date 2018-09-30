@@ -3,7 +3,7 @@ import { encrypt } from './helpers';
 require('dotenv').config();
 
 const HOST = 'smtp.gmail.com';
-const BASE_URL = 'http://icoworld.projects.oktend.com:3030' // process.env.BASE_URL;
+const BASE_URL = 'http://icoworld.projects.oktend.com:3000' // process.env.BASE_URL;
 const SECRET = 'secret' // process.env.EMAIL_SECRET;
 const SENDER_EMAIL = 'icoworldcloud@gmail.com' // process.env.SENDER_EMAIL_ADDRESS;
 const SENDERPASS = '123456@@' // process.env.SENDER_EMAIL_PASS;
