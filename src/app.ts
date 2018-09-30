@@ -177,7 +177,7 @@ router.post('/deploy', async (ctx: Koa.Context) => {
 router.get('/confirmEmail/:hash', (ctx) => {
     const { params: { hash } } = ctx;
     console.log('hash', hash);
-    const SECRET = process.env.EMAIL_SECRET;
+    const SECRET = 'secret' // process.env.EMAIL_SECRET;
     console.log('SECRET', SECRET)
     const userId = decrypt(SECRET, hash);
     console.log('userId', userId);
