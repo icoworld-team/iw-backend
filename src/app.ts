@@ -12,6 +12,9 @@ import { hash, verify } from './auth/digest';
 import User, {setUserRole, getUserData} from './models/user';
 import {deployContract} from './eth/contracts';
 import admin from './admin';
+import { generateConfirmationUrl, generateEmailBody, sendMail } from './confirmEmail';
+import { decrypt } from './confirmEmail/helpers';
+import { updateConfirmationStatus } from './confirmEmail/confirmation';
 
 // Initialize of Koa application.
 const app = new Koa();
@@ -121,6 +124,12 @@ router.post('/signup', async (ctx, next) => {
             await ctx.login(user);
             setUserRole(user);
             ctx.body = getUserData(user);
+
+            // sending confirmation email
+            const confirmEmailUrl = generateConfirmationUrl(user._id.toString());
+            const emailBody = generateEmailBody(confirmEmailUrl);
+            await sendMail(user.email, emailBody);
+            updateConfirmationStatus(user._id, 'sendedConfirmation');
         }
     })(ctx, next);
 });
@@ -159,6 +168,14 @@ router.post('/deploy', async (ctx: Koa.Context) => {
         // should be IWError type error.
         ctx.throw(err.status, err.message);
     }
+});
+
+router.get('/confirmEmail/:hash', (ctx) => {
+    const { params: { hash } } = ctx;
+    const SECRET = process.env.EMAIL_SECRET;
+    const userId = decrypt(SECRET, hash);
+    updateConfirmationStatus(userId, 'confirmed');
+    ctx.body = 'Your email has been confirmed!';
 });
 
 
