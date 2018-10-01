@@ -32,9 +32,9 @@ export default async () => {
 		.once('open', () => console.log('Established connection to DB.'));
 	
 	const dbObj = await mongoose.connect(DB_URI, dbOptions);
-	const modelNames = ['User'];
+	/* const modelNames = ['User'];
 	modelNames.forEach(async (modelName) => {
 		await mongoose.models[modelName].ensureIndexes();
-	})
+	}) */
 	return dbObj;
 };

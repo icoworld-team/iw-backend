@@ -20,7 +20,7 @@ const schema = new Schema({
     email: {
         type: String,
         required: true,
-        unique: true
+        // unique: true
         /* index: {
             unique: true,
             sparse: true
@@ -121,6 +121,11 @@ const schema = new Schema({
         type: String,
         enum: ['en', 'ru', 'cn'],
         default: 'en'
+    },
+    confirmation: {
+        type: String,
+        enum: ['notConfirmed', 'sendedConfirmation', 'confirmed'],
+        default: 'notConfirmed'
     }
 }, { timestamps: true });
 

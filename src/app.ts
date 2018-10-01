@@ -12,6 +12,9 @@ import { hash, verify } from './auth/digest';
 import User, {setUserRole, getUserData} from './models/user';
 import {deployContract} from './eth/contracts';
 import admin from './admin';
+import { generateConfirmationUrl, generateEmailBody, sendMail } from './confirmEmail';
+import { decrypt } from './confirmEmail/helpers';
+import { updateConfirmationStatus } from './confirmEmail/confirmation';
 
 // Initialize of Koa application.
 const app = new Koa();
@@ -121,6 +124,16 @@ router.post('/signup', async (ctx, next) => {
             await ctx.login(user);
             setUserRole(user);
             ctx.body = getUserData(user);
+
+            // sending confirmation email
+            const confirmEmailUrl = generateConfirmationUrl(user._id.toString());
+            console.log('confirmEmailUrl', confirmEmailUrl)
+            const emailBody = generateEmailBody(confirmEmailUrl);
+            console.log('emailBody', emailBody)
+            const result = await sendMail(user.email, emailBody);
+            console.log('result')
+            console.log(result)
+            updateConfirmationStatus(user._id, 'sendedConfirmation');
         }
     })(ctx, next);
 });
@@ -159,6 +172,17 @@ router.post('/deploy', async (ctx: Koa.Context) => {
         // should be IWError type error.
         ctx.throw(err.status, err.message);
     }
+});
+
+router.get('/confirmEmail/:hash', (ctx) => {
+    const { params: { hash } } = ctx;
+    console.log('hash', hash);
+    const SECRET = 'secret' // process.env.EMAIL_SECRET;
+    console.log('SECRET', SECRET)
+    const userId = decrypt(SECRET, hash);
+    console.log('userId', userId);
+    updateConfirmationStatus(userId, 'confirmed');
+    ctx.body = 'Your email has been confirmed!';
 });
 
 
