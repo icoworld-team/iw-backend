@@ -116,6 +116,7 @@ const schema = new Schema({
         type: Boolean,
         default: false
     },
+    about: String,
     language: {
         type: String,
         enum: ['en', 'ru', 'cn'],
@@ -168,6 +169,7 @@ export function getUserData(user) {
         twoFactorAuth: user.twoFactorAuth,
         notifications: user.notifications,
         top: user.top,
+        about: user.about,
         language: user.language
     }
 }

@@ -110,6 +110,9 @@ const Types = gql(`
         jobs: [Expirience]
         wallets: [Wallet]
         notifications: Boolean
+        twoFactorAuth: Boolean
+        top: Boolean
+        about: String
         language: String
     }
 
@@ -141,7 +144,9 @@ const Types = gql(`
         city: String
         site: String
         clinks: CLinksInput
+        notifications: Boolean
         twoFactorAuth: Boolean
+        about: String
         language: String
     }
 
