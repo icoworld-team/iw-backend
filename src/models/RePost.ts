@@ -16,11 +16,15 @@ const schema = new Schema({
     date: {
         type: Date,
         default: Date.now
-    }
+    },
+    likes: [{
+        type: ObjectId,
+        ref: 'User'
+    }],
 });
 
 // Compose repost object properties for UI
-export function getRepostData(post, rdate) {
+export function getRepostData(post, value) {
     return {
         postId: post._id,
         userId: post.userId._id,
@@ -30,7 +34,8 @@ export function getRepostData(post, rdate) {
         edited: post.updatedAt,
         content: post.content,
         tags: post.tags,
-        reposted: rdate
+        reposted: value.date,
+        likes: value.likes
     }
 }
 

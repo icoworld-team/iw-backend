@@ -1,16 +1,18 @@
+import * as path from 'path';
+import * as fs from 'fs';
+import {STATIC_ROOT} from '../util/config';
 import User from "../models/user";
 import Pool, { generatePoolName } from "../models/Pool";
 import Post, { getPostData, getPostDataForEditResponse } from "../models/Post";
 import { formatPoolData, getPoolData } from '../models/Pool';
 import Contract from "../models/Contract";
 import Comment, {getCommentData} from "../models/Comment";
-import Wallet from "../models/Wallet";
 import RePost from "../models/RePost";
 import Image from "../models/Image";
 import News from "../models/News";
 
-// Verify contract URL.
-const verifyContractLink = process.env.ETH_VERIFY_CONTRACT_URL || 'https://etherscan.io/verifyContract';
+// Upload path value.
+const UPLOAD_PATH = path.join(STATIC_ROOT, 'images');
 
 // Mutation methods implementation.
 const MutationImpl = {
@@ -22,16 +24,29 @@ const MutationImpl = {
   },
  */
 
-  /* upload: async (parent, { file }) => {
-      const { stream, filename, mimetype, encoding } = await file;
-
-      // 1. Validate file metadata.
-
-      // 2. Record the file upload in your DB.
-      // const id = await recordFile( … )
-
-      return { filename, mimetype, encoding };
-  }, */
+  uploadFile: async (_, { userId, file }) => {
+    const { stream, filename, mimetype, encoding } = await file;
+    const user = await User.findById(userId);
+    const folder = path.join(UPLOAD_PATH, user._id.toString());
+    if (await !fs.existsSync(folder)) {
+      await fs.mkdirSync(folder);
+    }  
+    const image = await Image.create({
+      userId: user._id,
+      name: filename,
+      format: mimetype,
+      enc: encoding
+    });
+    const fname = image._id.toString();
+    const writer = fs.createWriteStream(path.join(folder, fname));
+    stream.on('error', (err) => {
+      if (err)
+        console.log(`Error uploading file <${filename}>: ${err}`);
+      writer.close();
+    });
+    stream.pipe(writer);
+    return image._id;
+  },
 
   addWallet: async (_, { userId, addr}) => {
     const user = await User.findById(userId).select('wallets') as any;
@@ -192,6 +207,18 @@ const MutationImpl = {
     const updated = await User.findByIdAndUpdate(userId, { $push: { reposts: repost._id } }, { new: true })
       .select('reposts') as any;
     return updated.reposts.length;
+  },
+
+  likeRePost: async (_, { id, userId, like }) => {
+    const updated = like
+            ? await RePost.findByIdAndUpdate(id, { $push: { likes: userId } }, { new: true }) as any
+            : await RePost.findByIdAndUpdate(id, { $pull: { likes: userId } }, { new: true }) as any
+    return updated.likes.length;
+  },
+
+  deleteRePost: async (_, { id }) => {
+    const removed = await RePost.findByIdAndRemove(id);
+    return true;
   },
 
   addImage: async (_, { postId, imageId }) => {

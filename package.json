@@ -15,6 +15,7 @@
   "author": "dschipunov",
   "license": "ISC",
   "dependencies": {
+    "@apollographql/apollo-upload-server": "^5.0.3",
     "apollo-server": "^2.0.0",
     "apollo-server-koa": "^2.0.0",
     "cookie": "^0.3.1",

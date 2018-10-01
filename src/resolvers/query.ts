@@ -3,7 +3,6 @@ import Pool from "../models/Pool";
 import { getPoolData, getPoolDataForSearchResult } from '../models/Pool';
 import Post, { getPostData } from "../models/Post";
 import * as investorHelpers from './helpers/investor';
-// import * as postHelpers from './helpers/posts'
 import Contract from "../models/Contract";
 import Comment, { getCommentData } from "../models/Comment";
 import { getRepostData } from "../models/RePost";
@@ -74,10 +73,15 @@ const QueryImpl = {
       });    
     const mappedPosts = posts.map(post => getPostData(post));
 
-    const reposts = await RePost.find().where('_id').in(user.reposts).select('postId date') as any;
+    const reposts = await RePost.find().where('_id').in(user.reposts).select('postId date likes') as any;
     const repsMap = new Map();
-    reposts.forEach(item => {
-      repsMap.set(item.postId.toString(), item.date);
+    reposts.forEach(async (item) => {
+      const likers = await User.find().where('_id').in(item.likes).select('name login');
+      const value = {
+        date: item.date,
+        likes: likers
+      }
+      repsMap.set(item.postId.toString(), value);
     });
     const ids = Array.from(repsMap.keys());
     const repostedPosts = await Post.find({ content: new RegExp(`.*${searchText}.*`, 'i') }).where('_id').in(ids)
@@ -95,9 +99,15 @@ const QueryImpl = {
 
   getReposts: async (_, { userId }) => {
     const user = await User.findById(userId).select('reposts') as any;
+    const reposts = await RePost.find().where('_id').in(user.reposts).select('postId date likes') as any;
     const repsMap = new Map();
-    user.reposts.forEach(item => {
-      repsMap.set(item.postId, item.date);
+    reposts.forEach(async (item) => {
+      const likers = await User.find().where('_id').in(item.likes).select('name login');
+      const value = {
+        date: item.date,
+        likes: likers
+      }
+      repsMap.set(item.postId.toString(), value);
     });
     const ids = Array.from(repsMap.keys());
     const posts = await Post.find().where('_id').in(ids)
@@ -105,7 +115,7 @@ const QueryImpl = {
         path: 'userId',
         select: 'name login avatar'
       });
-    return posts.map(post => getRepostData(post, repsMap.get(post._id)));
+    return posts.map(post => getRepostData(post, repsMap.get(post._id.toString())));
   },
 
   getFollowsPosts: async (_, { userId }) => {

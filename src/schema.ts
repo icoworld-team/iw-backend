@@ -33,6 +33,7 @@ const Query = gql(`
 // Mutation definition.
 const Mutation = gql(`
     type Mutation {
+        uploadFile(userId: ID!, file: Upload!): ID!
         addWallet(userId:ID!, addr:String!): ID!
         removeWallet(userId:ID!, id:ID!): Boolean!
         addEducation(input: ExpirienceInput!): ID!
@@ -54,6 +55,8 @@ const Mutation = gql(`
         deletePost(postId: ID!): ID!
         likePost(input: PostLikeInput!): Int!
         rePost(userId: ID!, postId: ID!): Int!
+        likeRePost(id: ID!,  userId: ID!, like: Boolean!): Int!
+        deleteRePost(id: ID!): Boolean!
         addImage(postId: ID, imageId: ID): Boolean!
         removeImage(postId: ID, imageId: ID, del: Boolean): Boolean!
         createComment(input: CommentInput!): Comment!
@@ -236,6 +239,11 @@ const Types = gql(`
         like: Boolean!
     }
 
+    type RepostLike {
+        name: String!
+        login: String
+    }
+
     type Repost {
         postId: ID!
         userId: ID!
@@ -246,6 +254,7 @@ const Types = gql(`
         content: String!
         tags: [String!]!
         reposted: String
+        likes: [RepostLike]
     }
 
     type SearchPostInProfileResponse {

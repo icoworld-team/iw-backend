@@ -10,7 +10,7 @@ const schema = new Schema({
         ref: 'User',
         required: true
     },
-    filename: {
+    name: {
         type: String,
         required: true
     },
@@ -18,8 +18,8 @@ const schema = new Schema({
         type: String,
         required: true
     },
-    size: {
-        type: Number,
+    enc: {
+        type: String,
         required: true
     }
 }, {timestamps: true});

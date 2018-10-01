@@ -5,13 +5,14 @@ import * as Router from 'koa-router';
 import * as bodyParser from 'koa-bodyparser';
 import * as serve from 'koa-static';
 import * as cors from 'koa2-cors';
-import * as path from 'path';
+import {STATIC_ROOT, SESSION_KEYS, UPLOAD_MAX_SIZE, UPLOAD_MAX_FILES} from './util/config';
 import { Strategy as LocalStrategy } from 'passport-local'
 import { IWError } from './util/IWError';
 import { hash, verify } from './auth/digest';
 import User, {setUserRole, getUserData} from './models/user';
 import {deployContract} from './eth/contracts';
 import admin from './admin';
+import { apolloUploadKoa } from 'apollo-upload-server'
 import { generateConfirmationUrl, generateEmailBody, sendMail } from './confirmEmail';
 import { decrypt } from './confirmEmail/helpers';
 import { updateConfirmationStatus } from './confirmEmail/confirmation';
@@ -20,10 +21,9 @@ import { updateConfirmationStatus } from './confirmEmail/confirmation';
 const app = new Koa();
 const router = new Router();
 
-const STATIC_ROOT = path.join(process.env.STATIC_PATH || process.cwd(),'static');
-
 app.use(serve(STATIC_ROOT));
 app.use(bodyParser());
+app.use(apolloUploadKoa({ maxFileSize: UPLOAD_MAX_SIZE, maxFiles: UPLOAD_MAX_FILES }))
 
 // cors
 app.use(cors({
@@ -35,7 +35,7 @@ app.use(cors({
 }));
 
 // Coockie sign keys.
-app.keys = [process.env.SESSION_KEYS || '97Jix8Mcc4G+CD02iunYB6sZTjXxQfks'];
+app.keys = [SESSION_KEYS];
 const CONFIG = {
     key: 'sess:key',  /** (string) cookie key */
     maxAge: 86400000, /** (number) maxAge in ms (default is 1 days) */
