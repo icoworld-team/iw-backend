@@ -114,7 +114,8 @@ const Types = gql(`
         wallets: [Wallet]
         notifications: Boolean
         twoFactorAuth: Boolean
-        top: Boolean
+        top: Boolean!
+        verified: Boolean!
         about: String
         language: String
     }

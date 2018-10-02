@@ -116,6 +116,10 @@ const schema = new Schema({
         type: Boolean,
         default: false
     },
+    verified:  {
+        type: Boolean,
+        default: false
+    },
     about: String,
     language: {
         type: String,
@@ -174,6 +178,7 @@ export function getUserData(user) {
         twoFactorAuth: user.twoFactorAuth,
         notifications: user.notifications,
         top: user.top,
+        verified: user.verified,
         about: user.about,
         language: user.language
     }
