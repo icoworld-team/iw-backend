@@ -8,8 +8,6 @@ const Query = gql(`
         getUser(userId: ID!): User
         getFollows(userId: ID!): [User]!
         getSubscribers(userId: ID!): [User]!
-        getPMSenders(userId: ID!): [User]!
-        getCommenters(userId: ID!): [User]!
         getTopUsers(flag: Boolean!): [User]!
         isTopUser(userId: ID!): Boolean!
         getPool(poolId: ID!): Pool
@@ -27,6 +25,7 @@ const Query = gql(`
         getChatMessages(input: ChatInput!): [Message!]!
         searchChat(userId: ID!, searchText: String!): [Chat!]!
         getNews: [News!]!
+        getPopularTags(from: String!, to: String!): [String]
     }
 `);
 
@@ -36,18 +35,18 @@ const Mutation = gql(`
         uploadFile(userId: ID!, file: Upload!): ID!
         addWallet(userId:ID!, addr:String!): ID!
         removeWallet(userId:ID!, id:ID!): Boolean!
-        addEducation(input: ExpirienceInput!): ID!
+        addEducation(userId: ID!, input: ExpirienceInput!): ID!
+        updateEducation(userId: ID!, id: ID! input: ExpirienceInput!): Boolean!
         removeEducation(userId:ID!, id:ID!): Boolean!
-        addJob(input:ExpirienceInput!): ID!
+        addJob(userId: ID!, input:ExpirienceInput!): ID!
+        updateJob(userId: ID!, id: ID! input: ExpirienceInput!): Boolean!
         removeJob(userId:ID!, id:ID!): Boolean!
         updateUser(input: UserInput!): User!
         deleteUser(id: ID!): ID!
         followUser(userId: ID!, fanId: ID!): ID!
         unfollowUser(userId: ID!, fanId: ID!): Boolean!
-        addPMSender(userId: ID!, id: ID!): Boolean!
-        removePMSender(userId: ID!, id: ID!): Boolean!
-        addCommenter(userId: ID!, id: ID!): Boolean!
-        removeCommenter(userId: ID!, id: ID!): Boolean!
+        setPMSendersMode(userId: ID!, mode: String!): Boolean!
+        setCommentersMode(userId: ID!, mode: String!): Boolean!
         makeTopUser(userId: ID!, flag: Boolean!): Boolean!
         createPool(input: PoolInput!): PoolCreateResponse!
         createPost(input: PostInput!): Post!
@@ -121,7 +120,6 @@ const Types = gql(`
     }
 
     input ExpirienceInput {
-        userId: ID!
         name: String!
         from: String!
         to: String

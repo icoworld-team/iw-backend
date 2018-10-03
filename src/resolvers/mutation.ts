@@ -63,13 +63,20 @@ const MutationImpl = {
     return true;
   },
 
-  addEducation: async (_, { input }) => {
-    const {userId, ...data} = input;
+  addEducation: async (_, { userId, input }) => {
     const user = await User.findById(userId).select('educations') as any;
-    const obj = user.educations.create(data);
+    const obj = user.educations.create(input);
     user.educations.push(obj);
     user.save();
     return obj._id;
+  },
+
+  updateEducation: async (_, { userId, id, input }) => {
+    const user = await User.findById(userId).select('educations') as any;
+    const obj = user.educations.id(id);
+    obj.set(input);
+    user.save();
+    return true;
   },
 
   removeEducation: async (_, { userId, id}) => {
@@ -79,13 +86,20 @@ const MutationImpl = {
     return true;
   },
 
-  addJob: async (_, { input }) => {
-    const {userId, ...data} = input;
+  addJob: async (_, { userId, input }) => {
     const user = await User.findById(userId).select('jobs') as any;
-    const obj = user.jobs.create(data);
+    const obj = user.jobs.create(input);
     user.jobs.push(obj);
     user.save();
     return obj._id;
+  },
+
+  updateJob: async (_, { userId, id, input }) => {
+    const user = await User.findById(userId).select('jobs') as any;
+    const obj = user.jobs.id(id);
+    obj.set(input);
+    user.save();
+    return true;
   },
 
   removeJob: async (_, { userId, id}) => {
@@ -132,23 +146,13 @@ const MutationImpl = {
     return true;
   },
 
-  addPMSender: async (_, { userId, id }) => {
-    const updated = await User.findByIdAndUpdate(userId, { $push: { pmsenders: id } });
+  setPMSendersMode: async (_, { userId, mode }) => {
+    const updated = await User.findByIdAndUpdate(userId, { pmsenders: mode });
     return true;
   },
 
-  removePMSender: async (_, { userId, id }) => {
-    const updated = await User.findByIdAndUpdate(userId, { $pull: { pmsenders: id } });
-    return true;
-  },
-
-  addCommenter: async (_, { userId, id }) => {
-    const updated = await User.findByIdAndUpdate(userId, { $push: { commenters: id } });
-    return true;
-  },
-
-  removeCommenter: async (_, { userId, id }) => {
-    const updated = await User.findByIdAndUpdate(userId, { $pull: { commenters: id } });
+  setCommentersMode: async (_, { userId, mode }) => {
+    const updated = await User.findByIdAndUpdate(userId, { commenters: mode });
     return true;
   },
 

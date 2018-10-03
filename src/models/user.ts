@@ -96,14 +96,16 @@ const schema = new Schema({
         type: ObjectId,
         ref: 'User'
     }],
-    pmsenders: [{
-        type: ObjectId,
-        ref: 'User'
-    }],
-    commenters: [{
-        type: ObjectId,
-        ref: 'User'
-    }],
+    pmsenders: {
+        type: String,
+        enum: ['All','Verified','Follows','Nobody'],
+        default: 'All'
+    },
+    commenters: {
+        type: String,
+        enum: ['All','Verified','Follows','Nobody'],
+        default: 'All'
+    },
     twoFactorAuth: {
         type: Boolean,
         default: false
@@ -175,6 +177,8 @@ export function getUserData(user) {
         educations: user.educations,
         jobs: user.jobs,
         wallets: user.wallets,
+        pmsenders: user.pmsenders,
+        commenters: user.commenters,
         twoFactorAuth: user.twoFactorAuth,
         notifications: user.notifications,
         top: user.top,

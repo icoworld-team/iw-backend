@@ -10,6 +10,7 @@ import Chat, { formatChatDataWithLastMessage } from "../models/Chat";
 import Message, { formatMessageData } from "../models/Message";
 import RePost from "../models/RePost";
 import News, { getNewsData } from "../models/News";
+import { sortByValuesDesc } from "../util/common";
 
 // Query methods implementation.
 const QueryImpl = {
@@ -163,20 +164,6 @@ const QueryImpl = {
     return users.map((usr => getShortUserData(usr)));
   },
 
-  getPMSenders: async (_, { userId }) => {
-    const user = await User.findById(userId) as any;
-    const users = await User.find().where('_id').in(user.pmsenders)
-      .select('name login avatar');
-    return users.map((usr => getShortUserData(usr)));
-  },
-
-  getCommenters: async (_, { userId }) => {
-    const user = await User.findById(userId) as any;
-    const users = await User.find().where('_id').in(user.commenters)
-      .select('name login avatar');
-    return users.map((usr => getShortUserData(usr)));
-  },
-
   getTopUsers: async (_, {flag}) => {
     const users = await User.find({top: flag});
     return users.map((usr => getShortUserData(usr)));
@@ -250,6 +237,19 @@ const QueryImpl = {
     const news = await News.find();
     return news.map(newsItem => getNewsData(newsItem));
   },
+
+  getPopularTags: async (_, { from, to }) => {
+    const posts = await Post.find().where('createdAt').gte(from).lt(to).select('tags') as any;
+    const res = new Map();
+    posts.array.forEach(tags => {
+      tags.array.forEach(tag => {
+        let num:number = res.get(tag);
+        res.set(tag, (num) ? num + 1 : 1);
+      });  
+    });
+    const sres = new Map([...res].sort(sortByValuesDesc));
+    return sres.keys();
+  },  
 }
 
 export default QueryImpl;
