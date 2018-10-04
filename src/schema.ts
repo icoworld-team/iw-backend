@@ -112,6 +112,8 @@ const Types = gql(`
         jobs: [Expirience]
         wallets: [Wallet]
         notifications: Boolean
+        pmsenders: String!
+        commenters: String!
         twoFactorAuth: Boolean
         top: Boolean!
         verified: Boolean!
