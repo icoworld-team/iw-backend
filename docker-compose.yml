@@ -15,6 +15,9 @@ services:
     volumes:
       - "/var/mongo-data:/data/db"
       - "/var/mongo-backup:/opt"
+      - "/var/icoworld/docker-entrypoint:/docker-entrypoint-initdb.d/"
+    env_file:
+      - "/var/icoworld/mongo.env/"
     restart: on-failure
     container_name: database
     logging:
@@ -23,7 +26,8 @@ services:
         fluentd-address: 172.30.0.10:24224
         tag: mongo.log
     networks:
-      - efk_fluentd 
+      - efk_fluentd
+    command: mongod
   
   app:
       build:

@@ -1,4 +1,4 @@
-/mongo-data
+/mongo-*
 /node_modules
 /config
 /build
