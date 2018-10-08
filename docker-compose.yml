@@ -26,7 +26,10 @@ services:
         fluentd-address: 172.30.0.10:24224
         tag: mongo.log
     networks:
-      - efk_fluentd
+      efk_fluentd:
+        ipv4_address: 172.30.0.111
+    ports:
+      - "27017:27017"
     command: mongod
   
   app:
@@ -37,9 +40,13 @@ services:
           ETH_NODE_URL: http://icoworld.projects.oktend.com:8545
           ETH_PRIVATE_KEY: ""
           ETH_FROM_ACCOUNT: "0x007ccffb7916f37f7aeef05e8096ecfbe55afc2f"
-          ETH_DEPLOY_PRICE: "100000" 
+          ETH_DEPLOY_PRICE: "100000"
           PORT: 3000
-          DB_URI: mongodb://db:27017/ico_world_db
+          DB_URI: mongodb://icodb:ghwzbH99WAR3@172.30.0.111:27017/ico_world_db
+          BASE_URL: "http://icoworld.projects.oktend.com:3030"
+          EMAIL_SECRET: "secret"
+          SENDER_EMAIL_ADDRESS: "icoworldcloud@gmail.com"
+          SENDER_EMAIL_PASS: "123456@@"
       image: ico/backend:$BUILD_ID
       container_name: backend-$BUILD_ID
       ports:

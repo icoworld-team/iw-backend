@@ -31,7 +31,7 @@ pipeline {
         sh('''#!/bin/bash
           docker run --name backend-test-$BUILD_ID -d -p 5555:3000 ico/backend:$BUILD_ID && \\
           sleep 10 && \\
-          RESPONSE=`curl localhost:3000` || exit 2
+          RESPONSE=`curl localhost:5555` || exit 2
           if [ \$RESPONSE != 'icoWorld' ]; then
             echo "stopping container - ${BUILD_ID}"
             docker ps -f name=backend-test -q | xargs -r docker container stop
