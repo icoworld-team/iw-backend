@@ -210,7 +210,7 @@ const QueryImpl = {
 
   getChatMessages: async (_ , { input }) => {    
     const { chatId, skip } = input;
-    const limit = 10;
+    const limit = 20;
     const chat = await Chat.findById(chatId) as any;
     const messages = await Message.find().where('_id').in(chat.messages)
       .populate({
@@ -220,8 +220,14 @@ const QueryImpl = {
       .sort({ date: -1 })
       .skip(skip)
       .limit(limit);
+    
+    const countMessages = await Message.find().where('_id').in(chat.messages).countDocuments();
+    const nextMessages = (skip + messages.length) < countMessages;
 
-    return messages.map(message => formatMessageData(message));
+    return {
+      nextMessages,
+      messages: messages.map(message => formatMessageData(message))
+    };
   },
 
   searchChat: async (_, { userId, searchText }) => {

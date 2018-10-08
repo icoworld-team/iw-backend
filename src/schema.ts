@@ -22,7 +22,7 @@ const Query = gql(`
         getInvestors(input: InvestorsFilterParamsInput!): [Investor!]!
         getContracts(input: ContractsParamsInput!): [Contract]!
         getChats(userId: ID!): [Chat!]!
-        getChatMessages(input: ChatInput!): [Message!]!
+        getChatMessages(input: ChatInput!): ChatMessagesResponse!
         searchChat(userId: ID!, searchText: String!): [Chat!]!
         getNews: [News!]!
         getPopularTags(from: String!, to: String!): [String]
@@ -358,6 +358,11 @@ const Types = gql(`
     input ChatInput {
         chatId: ID!
         skip: Int!
+    }
+
+    type ChatMessagesResponse {
+        nextMessages: Boolean!
+        messages: [Message!]!
     }
 
     type News {
