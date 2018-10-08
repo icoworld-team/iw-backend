@@ -75,15 +75,7 @@ const QueryImpl = {
     const mappedPosts = posts.map(post => getPostData(post));
 
     const reposts = await RePost.find().where('_id').in(user.reposts).select('postId date likes') as any;
-    const repsMap = new Map();
-    reposts.forEach(async (item) => {
-      const likers = await User.find().where('_id').in(item.likes).select('name login');
-      const value = {
-        date: item.date,
-        likes: likers
-      }
-      repsMap.set(item.postId.toString(), value);
-    });
+    const repsMap:Map<string, any> = await getRepostsMap(reposts);
     const ids = Array.from(repsMap.keys());
     const repostedPosts = await Post.find({ content: new RegExp(`.*${searchText}.*`, 'i') }).where('_id').in(ids)
       .populate({
@@ -101,15 +93,7 @@ const QueryImpl = {
   getReposts: async (_, { userId }) => {
     const user = await User.findById(userId).select('reposts') as any;
     const reposts = await RePost.find().where('_id').in(user.reposts).select('postId date likes') as any;
-    const repsMap = new Map();
-    reposts.forEach(async (item) => {
-      const likers = await User.find().where('_id').in(item.likes).select('name login');
-      const value = {
-        date: item.date,
-        likes: likers
-      }
-      repsMap.set(item.postId.toString(), value);
-    });
+    const repsMap:Map<string, any> = await getRepostsMap(reposts);
     const ids = Array.from(repsMap.keys());
     const posts = await Post.find().where('_id').in(ids)
       .populate({
@@ -256,6 +240,19 @@ const QueryImpl = {
     const sres = new Map([...res].sort(sortByValuesDesc));
     return sres.keys();
   },  
+}
+
+async function getRepostsMap(reposts:Array<any>):Promise<Map<string,any>> {
+  const repsMap = new Map();
+    for(const repost of reposts){
+      const likers = await User.find().where('_id').in(repost.likes).select('name login');
+      const value = {
+        date: repost.date,
+        likes: likers
+      }
+      repsMap.set(repost.postId.toString(), value);
+    };
+  return repsMap;
 }
 
 export default QueryImpl;
