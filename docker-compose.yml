@@ -30,7 +30,7 @@ services:
         ipv4_address: 172.30.0.111
     ports:
       - "27017:27017"
-    command: mongod
+    command: mongod --bind_ip 0.0.0.0
   
   app:
       build:
