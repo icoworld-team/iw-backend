@@ -39,9 +39,13 @@ services:
           ETH_NODE_URL: http://icoworld.projects.oktend.com:8545
           ETH_PRIVATE_KEY: ""
           ETH_FROM_ACCOUNT: "0x007ccffb7916f37f7aeef05e8096ecfbe55afc2f"
-          ETH_DEPLOY_PRICE: "100000" 
+          ETH_DEPLOY_PRICE: "100000"
           PORT: 3000
           DB_URI: mongodb://icodb:ghwzbH99WAR3@db:27017/ico_world_db
+          BASE_URL: "http://icoworld.projects.oktend.com:3030"
+          EMAIL_SECRET: "secret"
+          SENDER_EMAIL_ADDRESS: "icoworldcloud@gmail.com"
+          SENDER_EMAIL_PASS: "123456@@"
       image: ico/backend:$BUILD_ID
       container_name: backend-$BUILD_ID
       ports:
