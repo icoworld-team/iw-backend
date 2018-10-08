@@ -104,6 +104,8 @@ const Types = gql(`
         login: String
         email: String!
         phone: String
+        photo: ID
+        avatar: ID
         country: String
         city: String
         site: String
