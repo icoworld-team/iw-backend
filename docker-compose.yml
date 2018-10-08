@@ -1,19 +1,33 @@
 version: '2' 
+networks:
+  efk_fluentd:
+    external: true
 services:
   
-  proxy:
-    build: ./nginx
-    ports:
-      - "3000:3000"
-    container_name: balancer
+  #  proxy:
+  #    build: ./nginx
+  #    ports:
+  #      - "3000:3000"
+  #    container_name: balancer
 
   db:
     image: mongo
     volumes:
       - "/var/mongo-data:/data/db"
       - "/var/mongo-backup:/opt"
+      - "/var/icoworld/docker-entrypoint:/docker-entrypoint-initdb.d/"
+    env_file:
+      - "/var/icoworld/mongo.env/"
     restart: on-failure
     container_name: database
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: 172.30.0.10:24224
+        tag: mongo.log
+    networks:
+      - efk_fluentd
+    command: mongod
   
   app:
       build:
@@ -27,9 +41,13 @@ services:
           PORT: 3000
           DB_URI: mongodb://db:27017/ico_world_db
       image: ico/backend:$BUILD_ID
-  backend-1:
-    extends:
-      service: app
-  backend-2:
-    extends:
-      service: app
+      container_name: backend-$BUILD_ID
+      ports:
+        - "3000:3000"
+      networks:
+        - efk_fluentd 
+      logging:
+        driver: "fluentd"
+        options:
+          fluentd-address: 172.30.0.10:24224
+          tag: backend.log

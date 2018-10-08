@@ -3,10 +3,14 @@ import Pool from "../models/Pool";
 import { getPoolData, getPoolDataForSearchResult } from '../models/Pool';
 import Post, { getPostData } from "../models/Post";
 import * as investorHelpers from './helpers/investor';
-import * as postHelpers from './helpers/posts'
 import Contract from "../models/Contract";
 import Comment, { getCommentData } from "../models/Comment";
 import { getRepostData } from "../models/RePost";
+import Chat, { formatChatDataWithLastMessage } from "../models/Chat";
+import Message, { formatMessageData } from "../models/Message";
+import RePost from "../models/RePost";
+import News, { getNewsData } from "../models/News";
+import { sortByValuesDesc } from "../util/common";
 
 // Query methods implementation.
 const QueryImpl = {
@@ -36,7 +40,7 @@ const QueryImpl = {
   },
 
   getPools: async (_, { userId }) => {
-    const user = await User.findById(userId) as any;
+    const user = await User.findById(userId).select('pools') as any;
     const pools = await Pool.find().where('_id').in(user.pools);
     return pools.map((pool => getPoolData(pool)));
   },
@@ -51,11 +55,9 @@ const QueryImpl = {
     return post ? getPostData(post) : null;
   },
 
-  searchPost: async (_, { input }) => {
-    const searchingParamsObject = postHelpers.generateSearchingParamsObject(input);
-
+  searchPost: async (_, { searchText }) => {
     const posts = await Post
-      .find(searchingParamsObject)
+      .find({ content: new RegExp(`.*${searchText}.*`, 'i') })
       .populate({
         path: 'userId',
         select: 'name login'
@@ -63,11 +65,50 @@ const QueryImpl = {
     return posts.map((post => getPostData(post)));
   },
 
-  getReposts: async (_, { userId }) => {
-    const user = await User.findById(userId) as any;
+  searchPostInProfile: async (_, { userId, searchText }) => {
+    const user = await User.findById(userId).select('posts reposts') as any;
+    const posts = await Post.find({ content: new RegExp(`.*${searchText}.*`, 'i') }).where('_id').in(user.posts)
+      .populate({
+        path: 'userId',
+        select: 'name login'
+      });    
+    const mappedPosts = posts.map(post => getPostData(post));
+
+    const reposts = await RePost.find().where('_id').in(user.reposts).select('postId date likes') as any;
     const repsMap = new Map();
-    user.reposts.forEach(item => {
-      repsMap.set(item.postId, item.date);
+    reposts.forEach(async (item) => {
+      const likers = await User.find().where('_id').in(item.likes).select('name login');
+      const value = {
+        date: item.date,
+        likes: likers
+      }
+      repsMap.set(item.postId.toString(), value);
+    });
+    const ids = Array.from(repsMap.keys());
+    const repostedPosts = await Post.find({ content: new RegExp(`.*${searchText}.*`, 'i') }).where('_id').in(ids)
+      .populate({
+        path: 'userId',
+        select: 'name login'
+      });
+    const mappedReposted = repostedPosts.map(post => getRepostData(post, repsMap.get(post._id.toString())));
+
+    return {
+      posts: mappedPosts,
+      reposts: mappedReposted
+    }
+  },
+
+  getReposts: async (_, { userId }) => {
+    const user = await User.findById(userId).select('reposts') as any;
+    const reposts = await RePost.find().where('_id').in(user.reposts).select('postId date likes') as any;
+    const repsMap = new Map();
+    reposts.forEach(async (item) => {
+      const likers = await User.find().where('_id').in(item.likes).select('name login');
+      const value = {
+        date: item.date,
+        likes: likers
+      }
+      repsMap.set(item.postId.toString(), value);
     });
     const ids = Array.from(repsMap.keys());
     const posts = await Post.find().where('_id').in(ids)
@@ -75,40 +116,62 @@ const QueryImpl = {
         path: 'userId',
         select: 'name login avatar'
       });
-    return posts.map(post => getRepostData(post, repsMap.get(post._id)));
+    return posts.map(post => getRepostData(post, repsMap.get(post._id.toString())));
+  },
+
+  getFollowsPosts: async (_, { userId }) => {
+    const user = await User.findById(userId).select('follows') as any;
+    const posts = await Post.find().where('userId').in(user.follows)
+    .populate({
+      path: 'userId',
+      select: 'name login avatar'
+    });
+    return posts.map(post => getPostData(post));
   },
 
   getComments: async (_, { postId }) => {
     const post = await Post.findById(postId) as any;
-    const comments = await Comment.find().where('_id').in(post.comments);
-    return comments.map((cmt => getCommentData(cmt)));
+    const comments = await Comment.find().where('_id').in(post.comments)
+    .populate({
+      path: 'userId',
+      select: 'name login'
+    }) as any;
+    return comments.map((cmt => getCommentData(cmt, cmt.userId.name, cmt.userId.login)));
   },
 
   getInvestors: async (_, { input }) => {
     const { sortBy, ...filterParams } = input;
     const searchingParamsObject = investorHelpers.generateSearchingParamsObject(filterParams);
-    const sortingParams = investorHelpers.generateSortingParamsObj(sortBy);
     const investors = await User
       .find(searchingParamsObject)
-      .sort(sortingParams)
-      .select({ name: 1, follows: 1, login: 1 });
-
-    const formattedInvestors = investors.map(investor => investorHelpers.formatInvestor(investor));
+      .select({ name: 1, subscribers: 1, login: 1, createdAt: 1 });
+    const sortedInvestors = investorHelpers.sortInvestors(investors, sortBy);
+    const formattedInvestors = sortedInvestors.map(investor => investorHelpers.formatInvestor(investor));
     return formattedInvestors;
   },
 
   getFollows: async (_, { userId }) => {
     const user = await User.findById(userId) as any;
     const users = await User.find().where('_id').in(user.follows)
-      .select({ name: 1, login: 1, avatar: 1, location: 1 });
+      .select('name login avatar');
     return users.map((usr => getShortUserData(usr)));
   },
 
   getSubscribers: async (_, { userId }) => {
     const user = await User.findById(userId) as any;
     const users = await User.find().where('_id').in(user.subscribers)
-      .select({ name: 1, login: 1, avatar: 1, location: 1 });
+      .select('name login avatar');
     return users.map((usr => getShortUserData(usr)));
+  },
+
+  getTopUsers: async (_, {flag}) => {
+    const users = await User.find({top: flag});
+    return users.map((usr => getShortUserData(usr)));
+  },
+
+  isTopUser: async (_, { userId }) => {
+    const user = await User.findById(userId).select('top') as any;
+    return user ? user.top : false;
   },
 
   getContracts: async (_, { input }) => {
@@ -122,7 +185,77 @@ const QueryImpl = {
     }
     const contracts = await Contract.find(params);
     return contracts;
-  }
+  },
+
+  getChats: async (_, { userId }) => {
+    const user = await User.findById(userId) as any;
+    const chats = await Chat.find().where('_id').in(user.chats)
+      .populate({
+        path: 'members',
+        select: 'name'
+      })
+      .populate({
+        path: 'messages',
+        select: 'userId content read date',
+        populate: {
+          path: 'userId',
+          select: 'name'
+        } 
+      })
+      .slice('messages', -1);
+
+    const mappedChats = chats.map(chat => formatChatDataWithLastMessage(chat, userId));
+    return mappedChats;
+  },
+
+  getChatMessages: async (_ , { input }) => {    
+    const { chatId, skip } = input;
+    const limit = 20;
+    const chat = await Chat.findById(chatId) as any;
+    const messages = await Message.find().where('_id').in(chat.messages)
+      .populate({
+        path: 'userId',
+        select: 'name'
+      })
+      .sort({ date: -1 })
+      .skip(skip)
+      .limit(limit);
+    
+    const countMessages = await Message.find().where('_id').in(chat.messages).countDocuments();
+    const nextMessages = (skip + messages.length) < countMessages;
+
+    return {
+      nextMessages,
+      messages: messages.map(message => formatMessageData(message))
+    };
+  },
+
+  searchChat: async (_, { userId, searchText }) => {
+    const chats = await this.default.getChats(null, { userId });
+    const filteredChats = chats.filter(chat => {
+      const regexp = new RegExp(`.*${searchText}.*`, 'i');
+      return regexp.test(chat.parnter.name);
+    });
+    return filteredChats;
+  },
+
+  getNews: async () => {
+    const news = await News.find();
+    return news.map(newsItem => getNewsData(newsItem));
+  },
+
+  getPopularTags: async (_, { from, to }) => {
+    const posts = await Post.find().where('createdAt').gte(from).lt(to).select('tags') as any;
+    const res = new Map();
+    posts.array.forEach(tags => {
+      tags.array.forEach(tag => {
+        let num:number = res.get(tag);
+        res.set(tag, (num) ? num + 1 : 1);
+      });  
+    });
+    const sres = new Map([...res].sort(sortByValuesDesc));
+    return sres.keys();
+  },  
 }
 
 export default QueryImpl;

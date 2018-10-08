@@ -35,3 +35,8 @@ export function notNull(arg, name: string) {
     if (arg == undefined || null)
         throw new Error(`Argument <${name}> is NULL or UNDEINED!`);
 }
+
+// Sort map by values desc method.
+export function sortByValuesDesc(b, a) { 
+    return a[1] === b[1] ? 0 : a[1] > b[1] ? 1 : -1;
+}

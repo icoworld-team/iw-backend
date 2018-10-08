@@ -1,6 +1,6 @@
 import IO = require('koa-socket-2');
 import Message from '../models/Message';
-import Chat from '../models/Chat';
+import Chat, { formatChatData } from '../models/Chat';
 import User from '../models/user';
 import * as cookie from 'cookie';
 
@@ -26,6 +26,7 @@ function getSession(cookies, cookieKey) {
 const io = new IO();
 
 io.use(async (ctx, next) => {
+  console.log('auth middleware');
   const cookieKey = 'sess:key';
   const userId = getSession(ctx.socket.socket.request.headers.cookie, cookieKey);
   if (userId) {
@@ -42,6 +43,7 @@ io.use(async (ctx, next) => {
 })
 
 io.on('connection', async (ctx) => {
+  console.log(`connected ${ctx.socket.id}`)
   const cookieKey = 'sess:key';
   const userId = getSession(ctx.socket.request.headers.cookie, cookieKey);
   if (userId) {
@@ -51,12 +53,19 @@ io.on('connection', async (ctx) => {
 });
 
 io.on('disconnect', async (ctx) => {
+  console.log(`disconnected ${ctx.socket.id}`)
   if (ctx.state.isAuth) {
     onlineUsers.delete(ctx.state.userId);
   }
 });
 
+io.on('error', (error) => {
+  console.log('error');
+  console.log(error);
+});
+
 io.on('newMessage', async (ctx, data) => {
+  console.log('event newMessage');
   try {
     if (!ctx.state.isAuth) {
       throw new Error('User is not authenticated');
@@ -65,6 +74,12 @@ io.on('newMessage', async (ctx, data) => {
     const authorId = ctx.state.userId;
     const { text, partnerId } = data;
 
+    console.log('authorId:', authorId);
+    console.log('text:', text);
+    console.log('partnerId:', partnerId);
+
+    const author = await User.findById(authorId).select('name') as any;
+
     const messageData = {
       userId: authorId,
       content: text
@@ -72,42 +87,95 @@ io.on('newMessage', async (ctx, data) => {
     const message = await Message.create(messageData) as any;
 
     let chat = await Chat.findOne({ members: { $all: [authorId, partnerId] } }) as any;
+    let isChatExist = !!chat;
 
-    if (!chat) {
+    if (!isChatExist) {
+      console.log('creating chat');
       chat = await Chat.create({ members: [authorId, partnerId] });
       await User.findByIdAndUpdate(authorId, { $push: { chats: chat._id } });
       await User.findByIdAndUpdate(partnerId, { $push: { chats: chat._id } });
+    } else {
+      console.log('getting chat');
     }
 
     chat.messages.push(message._id);
     await chat.save();
 
-    const response = {
+    let newChatResponseToAuthor, newChatResponseToPartner;
+
+    if (!isChatExist) {
+      const chatData = await Chat.findById(chat._id)
+        .populate({
+          path: 'members',
+          select: 'name'
+        })
+
+      newChatResponseToAuthor = formatChatData(chatData, authorId);
+      newChatResponseToPartner = formatChatData(chatData, partnerId);
+
+      const lastMessage = {
+        id: message._id,
+        author: {
+          id: authorId,
+          name: author.name
+        },
+        content: message.content,
+        read: message.read,
+        date: message.date
+      };
+      
+      newChatResponseToAuthor.lastMessage = lastMessage;
+      newChatResponseToPartner.lastMessage = lastMessage;
+    }
+
+    const newMessageResponse = {
       chatId: chat._id,
       messageId: message._id,
       read: message.read,
-      userId: message.userId,
+      author: {
+        id: authorId,
+        name: author.name
+      },
       content: message.content,
       date: message.date
     }
     
     if (onlineUsers.has(partnerId)) {
+      console.log(`partner ${partnerId} is online`);
       const partnerSocket = onlineUsers.get(partnerId);
-      partnerSocket.emit('newMessage', response);
+      if (!isChatExist) {
+        partnerSocket.emit('newChat', newChatResponseToPartner);
+      } else {
+        partnerSocket.emit('newMessage', newMessageResponse);
+      }
+    } else {
+      console.log(`partner ${partnerId} is offline`);
     }
 
-    ctx.socket.emit('newMessage', response);
+    if (!isChatExist) {
+      ctx.socket.emit('newChat', newChatResponseToAuthor);
+    } else {
+      ctx.socket.emit('newMessage', newMessageResponse);
+    }
   } catch (error) {
+    console.log('error');
     console.log(error);
-    ctx.socket.emit('error', error);
+    // ctx.socket.emit('error', error);
   }
 });
 
-io.on('test', async (ctx, data) => {
-  // ctx.socket.emit('test', data);
-  for (const socketObject of onlineUsers.values()) {
-    socketObject.emit('test', data);
+io.on('readMessage', async (ctx, data) => {
+  const { messageIds, partnerId } = data;
+  await Message.updateMany({ _id: { $in: messageIds } }, { read: true });
+  if (onlineUsers.has(partnerId)) {
+    const partnerSocket = onlineUsers.get(partnerId);
+    partnerSocket.emit('readMessage', messageIds);
   }
+  ctx.socket.emit('readMessage', messageIds);
+});
+
+io.on('test', async (ctx, data) => {
+  ctx.socket.emit('test', data);
 });
 
 export default io;

@@ -4,7 +4,11 @@ const Schema = mongoose.Schema;
 const ObjectId = Schema.Types.ObjectId;
 
 // Repost schema definition.
-const RePost = new Schema({
+const schema = new Schema({
+    userId: {
+        type: ObjectId,
+        ref: 'User'
+    },
     postId: {
         type: ObjectId,
         ref: 'Post'
@@ -12,23 +16,27 @@ const RePost = new Schema({
     date: {
         type: Date,
         default: Date.now
-    }
+    },
+    likes: [{
+        type: ObjectId,
+        ref: 'User'
+    }],
 });
 
 // Compose repost object properties for UI
-export function getRepostData(post, rdate) {
+export function getRepostData(post, value) {
     return {
         postId: post._id,
         userId: post.userId._id,
         userName: post.userId.name,
         userLogin: post.userId.login,
-        userAvatar: post.userId.avatar,
-        date: post.date,
-        edited: post.edited,
+        date: post.createdAt,
+        edited: post.updatedAt,
         content: post.content,
-        tags: post.postId.tags,
-        reposted: rdate
+        tags: post.tags,
+        reposted: value.date,
+        likes: value.likes
     }
 }
 
-export default RePost;
+export default mongoose.model('RePost', schema);

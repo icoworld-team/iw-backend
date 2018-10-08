@@ -5,19 +5,25 @@ import * as Router from 'koa-router';
 import * as bodyParser from 'koa-bodyparser';
 import * as serve from 'koa-static';
 import * as cors from 'koa2-cors';
+import {STATIC_ROOT, SESSION_KEYS, UPLOAD_MAX_SIZE, UPLOAD_MAX_FILES} from './util/config';
 import { Strategy as LocalStrategy } from 'passport-local'
 import { IWError } from './util/IWError';
 import { hash, verify } from './auth/digest';
 import User, {setUserRole, getUserData} from './models/user';
 import {deployContract} from './eth/contracts';
 import admin from './admin';
+import { apolloUploadKoa } from 'apollo-upload-server'
+import { generateConfirmationUrl, generateEmailBody, sendMail } from './confirmEmail';
+import { decrypt } from './confirmEmail/helpers';
+import { updateConfirmationStatus } from './confirmEmail/confirmation';
 
 // Initialize of Koa application.
 const app = new Koa();
 const router = new Router();
 
-app.use(serve('public'));
+app.use(serve(STATIC_ROOT));
 app.use(bodyParser());
+app.use(apolloUploadKoa({ maxFileSize: UPLOAD_MAX_SIZE, maxFiles: UPLOAD_MAX_FILES }))
 
 // cors
 app.use(cors({
@@ -29,7 +35,7 @@ app.use(cors({
 }));
 
 // Coockie sign keys.
-app.keys = [process.env.SESSION_KEYS || '97Jix8Mcc4G+CD02iunYB6sZTjXxQfks'];
+app.keys = [SESSION_KEYS];
 const CONFIG = {
     key: 'sess:key',  /** (string) cookie key */
     maxAge: 86400000, /** (number) maxAge in ms (default is 1 days) */
@@ -72,15 +78,12 @@ passport.use('local-signup', new LocalStrategy({
     async function (ctx, email, password, done) {
         const { firstName, lastName } = ctx.body;
         try {
-            let user = await User.findOne({ email }) as any;
-            if(user)
-                throw new IWError(409, `There's an account already registered to email: ${email}`);
             const userData = {
                 name: `${firstName} ${lastName}`,
                 email,
                 pwd: await hash(password)
             };
-            user = await User.create(userData);
+            const user = await User.create(userData);
             user.save();
             return done(null, user);
         } catch (err) {
@@ -121,6 +124,16 @@ router.post('/signup', async (ctx, next) => {
             await ctx.login(user);
             setUserRole(user);
             ctx.body = getUserData(user);
+
+            // sending confirmation email
+            const confirmEmailUrl = generateConfirmationUrl(user._id.toString());
+            console.log('confirmEmailUrl', confirmEmailUrl)
+            const emailBody = generateEmailBody(confirmEmailUrl);
+            console.log('emailBody', emailBody)
+            const result = await sendMail(user.email, emailBody);
+            console.log('result')
+            console.log(result)
+            updateConfirmationStatus(user._id, 'sendedConfirmation');
         }
     })(ctx, next);
 });
@@ -148,7 +161,7 @@ router.get('/logout', async (ctx) => {
 });
 
 // Contract deploy request handler.
-router.post('/deploy', async (ctx:Koa.Context) => {
+router.post('/deploy', async (ctx: Koa.Context) => {
     try {
         if(ctx.session == undefined || null)
             throw new IWError(401, "Access denied");
@@ -160,6 +173,18 @@ router.post('/deploy', async (ctx:Koa.Context) => {
         ctx.throw(err.status, err.message);
     }
 });
+
+router.get('/confirmEmail/:hash', (ctx) => {
+    const { params: { hash } } = ctx;
+    console.log('hash', hash);
+    const SECRET = 'secret' // process.env.EMAIL_SECRET;
+    console.log('SECRET', SECRET)
+    const userId = decrypt(SECRET, hash);
+    console.log('userId', userId);
+    updateConfirmationStatus(userId, 'confirmed');
+    ctx.body = 'Your email has been confirmed!';
+});
+
 
 router.get('/', async (ctx: Koa.Context) => {
     ctx.body = 'icoWorld'

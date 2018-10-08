@@ -1,28 +1,15 @@
 import mongoose = require('mongoose');
-import {Image} from './Image';
 import Wallet from './Wallet';
+import Expirience from './Expirience';
 import {Roles, getPermission} from '../auth/permissions';
-import RePost from './RePost';
 
 const Schema = mongoose.Schema;
 const ObjectId = Schema.Types.ObjectId;
 
-// Employment schema definition.
-const Employment = new Schema({
-    company: {
-        type: String,
-        required: true
-    },
-    position: {
-        type: String,
-        required: true
-    }
-});
-
 // User schema definition.
 const schema = new Schema({
     name: {
-        type: String, 
+        type: String,
         required: true
     },
     login: String,
@@ -33,11 +20,11 @@ const schema = new Schema({
     email: {
         type: String,
         required: true,
-        unique: true,
-        index: {
+        // unique: true
+        /* index: {
             unique: true,
             sparse: true
-        }
+        } */
     },
     role: {
         type: String,
@@ -45,12 +32,19 @@ const schema = new Schema({
         default: Roles.Guest
     },
     phone: String,
-    job: Employment,
-    photo: Image,
-    avatar: Image,
+    photo: {
+        type: ObjectId,
+        ref: 'Image'
+    },
+    avatar:  {
+        type: ObjectId,
+        ref: 'Image'
+    },
     country: String,
     city: String,
-    education: String,
+    site: String,
+    jobs: [Expirience],
+    educations: [Expirience],
     clinks: {
         fb: {
             type: String,
@@ -81,7 +75,10 @@ const schema = new Schema({
         type: ObjectId,
         ref: 'Post'
     }],
-    reposts: [RePost],
+    reposts: [{
+        type: ObjectId,
+        ref: 'RePost'
+    }],
     pools: [{
         type: ObjectId,
         ref: 'Pool'
@@ -99,14 +96,42 @@ const schema = new Schema({
         type: ObjectId,
         ref: 'User'
     }],
+    pmsenders: {
+        type: String,
+        enum: ['All','Verified','Follows','Nobody'],
+        default: 'All'
+    },
+    commenters: {
+        type: String,
+        enum: ['All','Verified','Follows','Nobody'],
+        default: 'All'
+    },
+    twoFactorAuth: {
+        type: Boolean,
+        default: false
+    },
     notifications: {
         type: Boolean,
         default: false
     },
+    top: {
+        type: Boolean,
+        default: false
+    },
+    verified:  {
+        type: Boolean,
+        default: false
+    },
+    about: String,
     language: {
         type: String,
         enum: ['en', 'ru', 'cn'],
         default: 'en'
+    },
+    confirmation: {
+        type: String,
+        enum: ['notConfirmed', 'sendedConfirmation', 'confirmed'],
+        default: 'notConfirmed'
     }
 }, { timestamps: true });
 
@@ -121,6 +146,7 @@ schema.set('toJSON', {
 export function setUserRole(user) {
     user.role = Roles.User;
 }
+
 // Compose user object properties for UI
 export function getShortUserData(user) {
     return {
@@ -128,7 +154,8 @@ export function getShortUserData(user) {
         name: user.name,
         login: user.login,
         avatar: user.avatar,
-        location: user.location,
+        country: user.country,
+        top: user.top
     }
 }
 // Compose user object properties for UI
@@ -141,13 +168,22 @@ export function getUserData(user) {
         role: user.role,
         permissions: getPermission(user.role),
         phone: user.phone,
-        job: user.job,
         photo: user.photo,
         avatar: user.avatar,
-        location: user.location,
+        country: user.country,
+        city: user.city,
+        site: user.site,
         clinks: user.clinks,
+        educations: user.educations,
+        jobs: user.jobs,
         wallets: user.wallets,
+        pmsenders: user.pmsenders,
+        commenters: user.commenters,
+        twoFactorAuth: user.twoFactorAuth,
         notifications: user.notifications,
+        top: user.top,
+        verified: user.verified,
+        about: user.about,
         language: user.language
     }
 }

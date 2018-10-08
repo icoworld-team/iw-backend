@@ -1,5 +1,4 @@
 import mongoose = require('mongoose');
-import { Image } from './Image';
 
 const Schema = mongoose.Schema;
 const ObjectId = Schema.Types.ObjectId;
@@ -12,7 +11,10 @@ const schema = new Schema({
         required: true
     },
     content: String,
-    reposted: Number,
+    reposted: {
+        type: Number,
+        default: 0
+    },
     comments: [{
         type: ObjectId,
         ref: 'Comment'
@@ -22,7 +24,10 @@ const schema = new Schema({
         ref: 'User'
     }],
     tags: [String],
-    attachments: [Image]
+    attachments: [{
+        type: ObjectId,
+        ref: 'Image'
+    }]
 }, { timestamps: true });
 
 // Compose post object properties for UI

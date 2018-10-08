@@ -8,28 +8,63 @@ const Query = gql(`
         getUser(userId: ID!): User
         getFollows(userId: ID!): [User]!
         getSubscribers(userId: ID!): [User]!
+        getTopUsers(flag: Boolean!): [User]!
+        isTopUser(userId: ID!): Boolean!
         getPool(poolId: ID!): Pool
         getPools(userId: ID!): [Pool]!
         searchPool(poolName: String!): [PoolInfo!]!
         getPost(postId: ID!): Post
-        searchPost(input: PostSearchingParamsInput!): [Post!]!
+        searchPost(searchText: String!): [Post!]!
+        searchPostInProfile(userId: ID!, searchText: String!): SearchPostInProfileResponse!
         getReposts(userId: ID!): [Post]!
+        getFollowsPosts(userId: ID!): [Post]!
         getComments(postId: ID!): [Comment]!
         getInvestors(input: InvestorsFilterParamsInput!): [Investor!]!
         getContracts(input: ContractsParamsInput!): [Contract]!
+        getChats(userId: ID!): [Chat!]!
+        getChatMessages(input: ChatInput!): ChatMessagesResponse!
+        searchChat(userId: ID!, searchText: String!): [Chat!]!
+        getNews: [News!]!
+        getPopularTags(from: String!, to: String!): [String]
     }
 `);
 
 // Mutation definition.
 const Mutation = gql(`
     type Mutation {
+        uploadFile(userId: ID!, file: Upload!): ID!
+        addWallet(userId:ID!, addr:String!): ID!
+        removeWallet(userId:ID!, id:ID!): Boolean!
+        addEducation(userId: ID!, input: ExpirienceInput!): ID!
+        updateEducation(userId: ID!, id: ID! input: ExpirienceInput!): Boolean!
+        removeEducation(userId:ID!, id:ID!): Boolean!
+        addJob(userId: ID!, input:ExpirienceInput!): ID!
+        updateJob(userId: ID!, id: ID! input: ExpirienceInput!): Boolean!
+        removeJob(userId:ID!, id:ID!): Boolean!
         updateUser(input: UserInput!): User!
+        deleteUser(id: ID!): ID!
+        followUser(userId: ID!, fanId: ID!): ID!
+        unfollowUser(userId: ID!, fanId: ID!): Boolean!
+        setPMSendersMode(userId: ID!, mode: String!): Boolean!
+        setCommentersMode(userId: ID!, mode: String!): Boolean!
+        makeTopUser(userId: ID!, flag: Boolean!): Boolean!
         createPool(input: PoolInput!): PoolCreateResponse!
         createPost(input: PostInput!): Post!
         editPost(input: PostEditInput!): PostEditResponse!
         deletePost(postId: ID!): ID!
+        likePost(input: PostLikeInput!): Int!
+        rePost(userId: ID!, postId: ID!): Int!
+        likeRePost(id: ID!,  userId: ID!, like: Boolean!): Int!
+        deleteRePost(id: ID!): Boolean!
+        addImage(postId: ID, imageId: ID): Boolean!
+        removeImage(postId: ID, imageId: ID, del: Boolean): Boolean!
+        createComment(input: CommentInput!): Comment!
+        editComment(input: CommentEditInput!): ID!
+        deleteComment(cmtId: ID!): ID!
         createContract(input: ContractInput!): ID!
         deleteContract(id: ID!): ID!
+        createNews(title: String!): ID!
+        deleteNews(newsId: ID!): ID!
     }
 `);
 
@@ -41,9 +76,17 @@ const Types = gql(`
         encoding: String!
     }
 
-    type Employment {
-        company: String!
-        position: String!
+    type Wallet {
+        id: ID!
+        kind: String!
+        address: String
+    }
+
+    type Expirience {
+        id: ID!
+        name: String!
+        from: String!
+        to: String
     }
 
     type Clinks {
@@ -61,17 +104,27 @@ const Types = gql(`
         login: String
         email: String!
         phone: String
-        job: Employment
         country: String
         city: String
-        education: String
+        site: String
         clinks: Clinks
-        follows: [ID!]
+        educations: [Expirience]
+        jobs: [Expirience]
+        wallets: [Wallet]
+        notifications: Boolean
+        pmsenders: String!
+        commenters: String!
+        twoFactorAuth: Boolean
+        top: Boolean!
+        verified: Boolean!
+        about: String
+        language: String
     }
 
-    input EmploymentInput {
-        company: String!
-        position: String!
+    input ExpirienceInput {
+        name: String!
+        from: String!
+        to: String
     }
 
     input CLinksInput {
@@ -88,13 +141,17 @@ const Types = gql(`
         login: String
         name: String
         email: String
-        education: String
         phone: String
+        photo: ID
+        avatar: ID
         country: String
         city: String
-        job: EmploymentInput
+        site: String
         clinks: CLinksInput
-        follows: [ID!]
+        notifications: Boolean
+        twoFactorAuth: Boolean
+        about: String
+        language: String
     }
 
     input PoolInput {
@@ -134,11 +191,6 @@ const Types = gql(`
         poolName: String!
     }
 
-    input PostSearchingParamsInput {
-        searchText: String
-        userId: ID
-    }
-
     type PoolInfo {
         poolId: String!
         poolName: String!
@@ -162,7 +214,10 @@ const Types = gql(`
         date: String
         edited: String
         content: String!
+        comments: [ID]
+        likes: [ID]
         tags: [String!]!
+        attachments: [ID]
     }
 
     type PostEditResponse {
@@ -179,9 +234,39 @@ const Types = gql(`
         tags: [String!]
     }
 
-    type Comment {
-        commentId: ID!
+    input PostLikeInput {
         userId: ID!
+        postId: ID!
+        like: Boolean!
+    }
+
+    type RepostLike {
+        name: String!
+        login: String
+    }
+
+    type Repost {
+        postId: ID!
+        userId: ID!
+        userName: String!
+        userLogin: String
+        date: String
+        edited: String
+        content: String!
+        tags: [String!]!
+        reposted: String
+        likes: [RepostLike]
+    }
+
+    type SearchPostInProfileResponse {
+        posts: [Post!]!
+        reposts: [Repost!]!
+    }
+
+    type Comment {
+        Id: ID!
+        userId: ID!
+        postId: ID!
         userName: String!
         userLogin: String
         date: String!
@@ -189,7 +274,19 @@ const Types = gql(`
         content: String!
     }
 
+    input CommentInput {
+        userId: ID!
+        postId: ID!
+        content: String!
+    }
+
+    input CommentEditInput {
+        cmtId: ID!
+        content: String!
+    }
+
     input InvestorsFilterParamsInput {
+        name: String
         country: String
         followersRangeFilter: FollowersRangeFilter
         sortBy: SORTING_PARAMS
@@ -201,6 +298,7 @@ const Types = gql(`
     }
 
     enum SORTING_PARAMS {
+        REGISTRATION_DATE
         NUMBER_OF_FOLLOWERS
         CAPITAL_AMOUNT
         PROFIT_LEVEL
@@ -234,6 +332,41 @@ const Types = gql(`
     input ContractsParamsInput {
         name: String
         description: String
+    }
+
+    type ChatUserData {
+        id: ID!
+        name: String!
+    }
+
+    type Message {
+        id: ID!
+        author: ChatUserData!
+        content: String!
+        read: Boolean!
+        date: String!
+    }
+
+    type Chat {
+        chatId: ID!
+        parnter: ChatUserData!
+        lastMessage: Message!
+    }
+
+    input ChatInput {
+        chatId: ID!
+        skip: Int!
+    }
+
+    type ChatMessagesResponse {
+        nextMessages: Boolean!
+        messages: [Message!]!
+    }
+
+    type News {
+        id: ID!
+        title: String!
+        date: String!
     }
 `);
 

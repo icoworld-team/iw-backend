@@ -24,4 +24,18 @@ const schema = new Schema({
     }
 });
 
-export default mongoose.model('Message', schema);    
+export function formatMessageData(message) {
+    const { _id, userId: user, content, read, date } = message;
+    return {
+        id: _id,
+        author: {
+            id: user._id,
+            name: user.name
+        },
+        content,
+        read,
+        date
+    }
+}
+
+export default mongoose.model('Message', schema);
