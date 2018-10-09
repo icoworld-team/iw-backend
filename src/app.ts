@@ -5,7 +5,7 @@ import * as Router from 'koa-router';
 import * as bodyParser from 'koa-bodyparser';
 import * as serve from 'koa-static';
 import * as cors from 'koa2-cors';
-import {STATIC_ROOT, SESSION_KEYS, UPLOAD_MAX_SIZE, UPLOAD_MAX_FILES} from './util/config';
+import {STATIC_ROOT, SESSION_KEYS, SESSION_TIMEOUT, UPLOAD_MAX_SIZE, UPLOAD_MAX_FILES} from './util/config';
 import { Strategy as LocalStrategy } from 'passport-local'
 import { IWError } from './util/IWError';
 import { hash, verify } from './auth/digest';
@@ -38,7 +38,7 @@ app.use(cors({
 app.keys = [SESSION_KEYS];
 const CONFIG = {
     key: 'sess:key',  /** (string) cookie key */
-    maxAge: 86400000, /** (number) maxAge in ms (default is 1 days) */
+    maxAge: SESSION_TIMEOUT, /** (number) maxAge in ms (default is 1 days) */
     overwrite: true,  /** (boolean) can overwrite or not (default true) */
     httpOnly: true,   /** (boolean) httpOnly or not (default true) */
     signed: true,     /** (boolean) signed or not (default true) */

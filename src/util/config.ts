@@ -5,7 +5,9 @@ export const verifyContractLink = process.env.ETH_VERIFY_CONTRACT_URL || 'https:
 // The path for serving static files.
 export const STATIC_ROOT = path.join(process.env.STATIC_PATH || process.cwd(),'static');
 // Session keys value.
-export const SESSION_KEYS = process.env.SESSION_KEYS || '97Jix8Mcc4G+CD02iunYB6sZTjXxQfks'
+export const SESSION_KEYS = process.env.SESSION_KEYS || '97Jix8Mcc4G+CD02iunYB6sZTjXxQfks';
+// Session max age (ms)
+export const SESSION_TIMEOUT = parseInt(process.env.SESSION_TIMEOUT) || 1800000;
 // Max uploaded file size
 export const UPLOAD_MAX_SIZE = parseInt(process.env.UPLOAD_MAX_SIZE || '2500000');
 // Max files to upload
