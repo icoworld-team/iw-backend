@@ -26,6 +26,29 @@ pipeline {
       }
     }
     
+    stage('Testing image ico/backend:${BUILD_ID}') {
+      steps {
+        sh('''#!/bin/bash
+          docker run --name backend-test-$BUILD_ID -d -p 5555:3000 --network=efk_fluentd --env-file /var/icoworld/test.env ico/backend:$BUILD_ID && \\
+          sleep 30 && \\
+          RESPONSE=`curl localhost:5555` || exit 2
+          if [ \$RESPONSE != 'icoWorld' ]; then
+            echo "stopping container - ${BUILD_ID}"
+            docker ps -f name=backend-test -q | xargs -r docker container stop
+            echo "renaming container - ${BUILD_ID}"
+            docker rename backend-test-$BUILD_ID backend-test-$BUILD_ID_fail
+            echo "backend did not answer"
+            exit 1
+          else
+            echo "stopping container - ${BUILD_ID}"
+            docker stop backend-test-$BUILD_ID
+            echo "removing container - ${BUILD_ID}"
+            docker rm backend-test-$BUILD_ID
+          fi
+          ''')
+      }
+    }
+
     stage('Deploy') {
       steps {
         sh('''#!/bin/bash

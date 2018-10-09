@@ -2,6 +2,8 @@ import mongoose = require('mongoose');
 require('dotenv').config();
 
 const DB_URI = process.env.DB_URI;
+console.log('DB_URI')
+console.log(DB_URI)
 
 // Setup DB.
 const dbOptions = {
