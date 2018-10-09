@@ -75,7 +75,7 @@ const QueryImpl = {
     const mappedPosts = posts.map(post => getPostData(post));
 
     const reposts = await RePost.find().where('_id').in(user.reposts).select('postId date likes') as any;
-    const repsMap:Map<string, any> = await getRepostsMap(reposts);
+    const repsMap:Map<string, any> = getRepostsMap(reposts);
     const ids = Array.from(repsMap.keys());
     const repostedPosts = await Post.find({ content: new RegExp(`.*${searchText}.*`, 'i') }).where('_id').in(ids)
       .populate({
@@ -93,7 +93,7 @@ const QueryImpl = {
   getReposts: async (_, { userId }) => {
     const user = await User.findById(userId).select('reposts') as any;
     const reposts = await RePost.find().where('_id').in(user.reposts).select('postId date likes') as any;
-    const repsMap:Map<string, any> = await getRepostsMap(reposts);
+    const repsMap:Map<string, any> = getRepostsMap(reposts);
     const ids = Array.from(repsMap.keys());
     const posts = await Post.find().where('_id').in(ids)
       .populate({
@@ -242,13 +242,12 @@ const QueryImpl = {
   },  
 }
 
-async function getRepostsMap(reposts:Array<any>):Promise<Map<string,any>> {
+function getRepostsMap(reposts:Array<any>):Map<string,any> {
   const repsMap = new Map();
     for(const repost of reposts){
-      const likers = await User.find().where('_id').in(repost.likes).select('name login');
       const value = {
         date: repost.date,
-        likes: likers
+        likes: repost.likes
       }
       repsMap.set(repost.postId.toString(), value);
     };
