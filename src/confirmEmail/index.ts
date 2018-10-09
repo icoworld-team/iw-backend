@@ -8,11 +8,11 @@ const SECRET = 'secret' // process.env.EMAIL_SECRET;
 const SENDER_EMAIL = 'icoworldcloud@gmail.com' // process.env.SENDER_EMAIL_ADDRESS;
 const SENDERPASS = '123456@@' // process.env.SENDER_EMAIL_PASS;
 
-console.log('environment variables')
-console.log('BASE_URL', BASE_URL);
-console.log('SECRET', SECRET);
-console.log('SENDER_EMAIL', SENDER_EMAIL);
-console.log('SENDERPASS', SENDERPASS);
+// console.log('environment variables')
+// console.log('BASE_URL', BASE_URL);
+// console.log('SECRET', SECRET);
+// console.log('SENDER_EMAIL', SENDER_EMAIL);
+// console.log('SENDERPASS', SENDERPASS);
 
 // create reusable transporter object using the default SMTP transport
 const transporter = nodemailer.createTransport({
