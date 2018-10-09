@@ -5,7 +5,14 @@ import schema from './schema';
 import database, {close} from './db';
 
 // Create the server
-const server = new ApolloServer(schema);
+const server = new ApolloServer({
+  ...schema,
+  context: (req) => {
+    return {
+      user: req.ctx.state.user
+    }
+  }
+});
 server.applyMiddleware({ app });
 
 // Attach the socket to the application
