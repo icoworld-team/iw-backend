@@ -50,7 +50,7 @@ services:
       image: ico/backend:$BUILD_ID
       container_name: backend-$BUILD_ID
       volumes:
-        - "./images:/app/static/images/:rw"
+        - "/var/static/images:/app/static/images/:rw"
       ports:
         - "3000:3000"
       networks:
