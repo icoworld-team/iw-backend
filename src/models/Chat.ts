@@ -29,6 +29,7 @@ export function formatChatData(chat, userId) {
     const parnter = chat.members.filter(member => member._id.toString() !== userId)[0];
     return {
         chatId: chat._id,
+        countUnreadMessages: chat.countUnreadMessages,
         parnter: {
             id: parnter._id,
             name: parnter.name
