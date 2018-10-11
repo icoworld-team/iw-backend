@@ -47,6 +47,7 @@ services:
           EMAIL_SECRET: "secret"
           SENDER_EMAIL_ADDRESS: "icoworldcloud@gmail.com"
           SENDER_EMAIL_PASS: "123456@@"
+          NODE_ENV: "development"
       image: ico/backend:$BUILD_ID
       container_name: backend-$BUILD_ID
       volumes:
