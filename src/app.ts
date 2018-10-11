@@ -5,14 +5,14 @@ import * as Router from 'koa-router';
 import * as bodyParser from 'koa-bodyparser';
 import * as serve from 'koa-static';
 import * as cors from 'koa2-cors';
-import {STATIC_ROOT, SESSION_KEYS, SESSION_TIMEOUT, UPLOAD_MAX_SIZE, UPLOAD_MAX_FILES} from './util/config';
+import {STATIC_ROOT, SESSION_KEYS, SESSION_TIMEOUT, UPLOAD_MAX_SIZE, UPLOAD_MAX_FILES, DEV_MODE} from './util/config';
 import { Strategy as LocalStrategy } from 'passport-local'
 import { IWError } from './util/IWError';
 import { hash, verify } from './auth/digest';
 import User, {setUserRole, getUserData} from './models/user';
 import {deployContract} from './eth/contracts';
 import admin from './admin';
-import { apolloUploadKoa } from 'apollo-upload-server'
+import { graphqlUploadKoa  } from 'graphql-upload'
 import { generateConfirmationUrl, generateEmailBody, sendMail } from './confirmEmail';
 import { decrypt } from './confirmEmail/helpers';
 import { updateConfirmationStatus } from './confirmEmail/confirmation';
@@ -23,7 +23,7 @@ const router = new Router();
 
 app.use(serve(STATIC_ROOT));
 app.use(bodyParser());
-app.use(apolloUploadKoa({ maxFileSize: UPLOAD_MAX_SIZE, maxFiles: UPLOAD_MAX_FILES }))
+app.use(graphqlUploadKoa({ maxFileSize: UPLOAD_MAX_SIZE, maxFiles: UPLOAD_MAX_FILES }))
 
 // cors
 app.use(cors({
@@ -50,19 +50,19 @@ app.use(session(CONFIG, app));
 app.use(passport.initialize());
 app.use(passport.session());
 
-/* app.use(async (ctx, next) => {
-    console.log('session')
-    console.log(ctx.session)
-    await next();
-}) */
+// app.use(async (ctx, next) => {
+//     console.log('session')
+//     console.log(ctx.session)
+//     await next();
+// });
 
-// allow only authenticated users perform requests for graphql
-/* app.use(async (ctx, next) => {
-    if (ctx.path === '/graphql' && ctx.isUnauthenticated()) {
-        ctx.throw(401, 'Unauthorized');
+// Allow only authenticated users perform requests for graphql
+app.use(async (ctx, next) => {
+    if (!DEV_MODE && ctx.path === '/graphql' && ctx.isUnauthenticated()) {
+        ctx.throw(401, 'Unauthorized access');
     }
     await next();
-}); */
+});
 
 // Passport setup.
 passport.serializeUser((user: any, done) => {
