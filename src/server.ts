@@ -4,6 +4,8 @@ import io from './socket'
 import schema from './schema';
 import database, {close} from './db';
 
+const path = '/graphql';
+
 // Create the server
 const server = new ApolloServer({
   ...schema,
@@ -13,7 +15,7 @@ const server = new ApolloServer({
     }
   }
 });
-server.applyMiddleware({ app });
+server.applyMiddleware({ app, path });
 
 // Attach the socket to the application
 io.attach(app);
