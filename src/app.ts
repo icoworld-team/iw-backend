@@ -12,7 +12,6 @@ import { hash, verify } from './auth/digest';
 import User, {setUserRole, getUserData} from './models/user';
 import {deployContract} from './eth/contracts';
 import admin from './admin';
-import { graphqlUploadKoa  } from 'graphql-upload'
 import { generateConfirmationUrl, generateEmailBody, sendMail } from './confirmEmail';
 import { decrypt } from './confirmEmail/helpers';
 import { updateConfirmationStatus } from './confirmEmail/confirmation';
@@ -23,7 +22,6 @@ const router = new Router();
 
 app.use(serve(STATIC_ROOT));
 app.use(bodyParser());
-app.use(graphqlUploadKoa({ maxFileSize: UPLOAD_MAX_SIZE, maxFiles: UPLOAD_MAX_FILES }))
 
 // cors
 app.use(cors({

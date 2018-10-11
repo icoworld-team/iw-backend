@@ -389,6 +389,7 @@ const config: Config = {
         Query: QueryImpl,
         Mutation: MutationImpl
     },
+    uploads: true
 };
 
 export default config;

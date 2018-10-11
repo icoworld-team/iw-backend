@@ -21,7 +21,6 @@
     "cookie": "^0.3.1",
     "dotenv": "^6.0.0",
     "graphql": "^0.13.2",
-    "graphql-upload": "^8.0.0",
     "koa": "^2.5.2",
     "koa-bodyparser": "^4.2.1",
     "koa-passport": "^4.1.0",

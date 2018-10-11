@@ -26,8 +26,7 @@ const MutationImpl = {
 
   uploadFile: async (_, { file }, ctx) => {
     const { stream, filename, mimetype, encoding } = await file;
-    const userId = ctx.user;
-    const user = await User.findById(userId);
+    const user = await User.findById(ctx.user);
     const folder = path.join(UPLOAD_PATH, user._id.toString());
     if (await !fs.existsSync(folder)) {
       await fs.mkdirSync(folder);
@@ -38,15 +37,8 @@ const MutationImpl = {
       format: mimetype,
       enc: encoding
     });
-    const fname = image._id.toString();
-    const writer = fs.createWriteStream(path.join(folder, fname));
-    stream.on('error', (err) => {
-      if (err)
-        console.log(`Error uploading file <${filename}>: ${err}`);
-      writer.close();
-    });
-    stream.pipe(writer);
-    return image._id;
+    const id = await storeFile(stream, image._id.toString(), folder);
+    return id;
   },
 
   addWallet: async (_, { userId, addr}) => {
@@ -277,6 +269,27 @@ const MutationImpl = {
     const deletedNews = await News.findByIdAndRemove(newsId);
     return deletedNews._id;
   },
+}
+/**
+ * Store file content.
+ * @param stream 
+ * @param id 
+ * @param folder 
+ */
+async function storeFile(stream, id, folder) {
+  const fpath = path.join(folder, id);
+  return new Promise((resolve, reject) =>
+    stream
+      .on('error', error => {
+        if (stream.truncated)
+          // Delete the truncated file
+          fs.unlinkSync(fpath)
+        reject(error)
+      })
+      .pipe(fs.createWriteStream(fpath))
+      .on('error', error => reject(error))
+      .on('finish', () => resolve(id))
+  );
 }
 
 export default MutationImpl;
