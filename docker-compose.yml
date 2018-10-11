@@ -49,6 +49,8 @@ services:
           SENDER_EMAIL_PASS: "123456@@"
       image: ico/backend:$BUILD_ID
       container_name: backend-$BUILD_ID
+      volumes:
+        - "/var/static/images:/app/static/images/:rw"
       ports:
         - "3000:3000"
       networks:

@@ -185,11 +185,24 @@ const QueryImpl = {
           path: 'userId',
           select: 'name'
         } 
-      })
-      .slice('messages', -1);
+      }) as any;
+      // .slice('messages', -1) as any;
 
-    const mappedChats = chats.map(chat => formatChatDataWithLastMessage(chat, userId));
-    return mappedChats;
+    const result = chats
+      .map(chat => {
+        const { _id, members, messages } = chat;
+        const countUnreadMessages = messages.filter(message => !message.read).length;
+        const lastMessage = chat.messages.slice(-1);
+        return {
+          _id,
+          members,
+          messages: lastMessage,
+          countUnreadMessages
+        }
+      })
+      .map(chat => formatChatDataWithLastMessage(chat, userId));
+
+    return result;
   },
 
   getChatMessages: async (_ , { input }) => {    
