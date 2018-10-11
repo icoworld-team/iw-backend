@@ -1,5 +1,10 @@
 import * as path from 'path';
 
+// Dev mode flag
+export const DEV_MODE = process.env.NODE_ENV === 'development';
+
+// Maximum size of DB pool connecions.
+export const DB_MAX_CONNS = parseInt(process.env.DB_MAX_CONNS) || 5;
 // Verify contract URL.
 export const verifyContractLink = process.env.ETH_VERIFY_CONTRACT_URL || 'https://etherscan.io/verifyContract';
 // The path for serving static files.
