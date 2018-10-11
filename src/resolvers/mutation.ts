@@ -24,8 +24,9 @@ const MutationImpl = {
   },
  */
 
-  uploadFile: async (_, { userId, file }) => {
+  uploadFile: async (_, { file }, ctx) => {
     const { stream, filename, mimetype, encoding } = await file;
+    const userId = ctx.user;
     const user = await User.findById(userId);
     const folder = path.join(UPLOAD_PATH, user._id.toString());
     if (await !fs.existsSync(folder)) {

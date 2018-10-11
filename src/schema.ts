@@ -32,7 +32,7 @@ const Query = gql(`
 // Mutation definition.
 const Mutation = gql(`
     type Mutation {
-        uploadFile(userId: ID!, file: Upload!): ID!
+        uploadFile(file: Upload!): ID!
         addWallet(userId:ID!, addr:String!): ID!
         removeWallet(userId:ID!, id:ID!): Boolean!
         addEducation(userId: ID!, input: ExpirienceInput!): ID!
@@ -71,6 +71,7 @@ const Mutation = gql(`
 // Types definition.
 const Types = gql(`
     type File {
+        id: ID!
         filename: String!
         mimetype: String!
         encoding: String!
