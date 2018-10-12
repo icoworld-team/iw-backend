@@ -244,11 +244,11 @@ const Types = gql(`
     }
 
     type RepostLike {
-        name: String!
-        login: String
+        id: ID!
     }
 
     type Repost {
+        id: ID!
         postId: ID!
         userId: ID!
         userName: String!
