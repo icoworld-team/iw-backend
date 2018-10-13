@@ -243,10 +243,6 @@ const Types = gql(`
         like: Boolean!
     }
 
-    type RepostLike {
-        id: ID!
-    }
-
     type Repost {
         id: ID!
         postId: ID!
@@ -258,7 +254,7 @@ const Types = gql(`
         content: String!
         tags: [String!]!
         reposted: String
-        likes: [RepostLike]
+        likes: [ID]
     }
 
     type SearchPostInProfileResponse {
