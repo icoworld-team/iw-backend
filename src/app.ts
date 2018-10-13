@@ -5,12 +5,12 @@ import * as Router from 'koa-router';
 import * as bodyParser from 'koa-bodyparser';
 import * as serve from 'koa-static';
 import * as cors from 'koa2-cors';
-import {STATIC_ROOT, SESSION_KEYS, SESSION_TIMEOUT, UPLOAD_MAX_SIZE, UPLOAD_MAX_FILES, DEV_MODE} from './util/config';
+import { STATIC_ROOT, SESSION_KEYS, SESSION_TIMEOUT, UPLOAD_MAX_SIZE, UPLOAD_MAX_FILES, DEV_MODE } from './util/config';
 import { Strategy as LocalStrategy } from 'passport-local'
 import { IWError } from './util/IWError';
 import { hash, verify } from './auth/digest';
-import User, {setUserRole, getUserData} from './models/user';
-import {deployContract} from './eth/contracts';
+import User, { setUserRole, getUserData } from './models/user';
+import { deployContract } from './eth/contracts';
 import admin from './admin';
 import { generateConfirmationUrl, generateEmailBody, sendMail } from './confirmEmail';
 import { decrypt } from './confirmEmail/helpers';
@@ -24,15 +24,13 @@ app.use(serve(STATIC_ROOT));
 app.use(bodyParser());
 
 // cors
-if(!DEV_MODE) {
-    app.use(cors({
-        exposeHeaders: ['WWW-Authenticate', 'Server-Authorization'],
-        maxAge: 5,
-        credentials: true,
-        allowMethods: ['GET', 'POST', 'DELETE'],
-        allowHeaders: ['Content-Type', 'Authorization', 'Accept'],
-    }));
-}
+app.use(cors({
+    exposeHeaders: ['WWW-Authenticate', 'Server-Authorization'],
+    maxAge: 5,
+    credentials: true,
+    allowMethods: ['GET', 'POST', 'DELETE'],
+    allowHeaders: ['Content-Type', 'Authorization', 'Accept'],
+}));
 
 // Coockie sign keys.
 app.keys = [SESSION_KEYS];
@@ -171,12 +169,12 @@ router.get('/logout', async (ctx) => {
 // Contract deploy request handler.
 router.post('/deploy', async (ctx: Koa.Context) => {
     try {
-        if(ctx.session == undefined || null)
+        if (ctx.session == undefined || null)
             throw new IWError(401, "Access denied");
         const { name, args } = ctx.request.body as any;
         const data = await deployContract(name, args);
         ctx.body = { data };
-    } catch(err) {
+    } catch (err) {
         // should be IWError type error.
         ctx.throw(err.status, err.message);
     }
