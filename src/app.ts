@@ -24,13 +24,15 @@ app.use(serve(STATIC_ROOT));
 app.use(bodyParser());
 
 // cors
-app.use(cors({
-    exposeHeaders: ['WWW-Authenticate', 'Server-Authorization'],
-    maxAge: 5,
-    credentials: true,
-    allowMethods: ['GET', 'POST', 'DELETE'],
-    allowHeaders: ['Content-Type', 'Authorization', 'Accept'],
-}));
+if(!DEV_MODE) {
+    app.use(cors({
+        exposeHeaders: ['WWW-Authenticate', 'Server-Authorization'],
+        maxAge: 5,
+        credentials: true,
+        allowMethods: ['GET', 'POST', 'DELETE'],
+        allowHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    }));
+}
 
 // Coockie sign keys.
 app.keys = [SESSION_KEYS];
