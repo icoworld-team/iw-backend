@@ -17,11 +17,10 @@ const schema = new Schema({
     }]
 });
 
-export function formatChatDataWithLastMessage(chat, userId) {
-    const lastMessage = chat.messages[0];
+export function formatChatDataWithUnreadMessages(chat, userId) {
     return {
         ...formatChatData(chat, userId),
-        lastMessage: formatMessageData(lastMessage)
+        unreadMessages: chat.unreadMessages.map(message => formatMessageData(message))
     }
 }
 
@@ -36,13 +35,5 @@ export function formatChatData(chat, userId) {
         },
     }
 }
-
-/* function formatPartnerData(partnerData) {
-    const { _id, name } = partnerData;
-    return {
-        id: _id,
-        name
-    }
-} */
 
 export default mongoose.model('Chat', schema);

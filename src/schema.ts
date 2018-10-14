@@ -21,7 +21,7 @@ const Query = gql(`
         getComments(postId: ID!): [Comment]!
         getInvestors(input: InvestorsFilterParamsInput!): [Investor!]!
         getContracts(input: ContractsParamsInput!): [Contract]!
-        getChats(userId: ID!): [ChatWithCountUnreadMessages!]!
+        getChats(userId: ID!): [ChatResponse!]!
         getChatMessages(input: ChatInput!): ChatMessagesResponse!
         searchChat(userId: ID!, searchText: String!): [Chat!]!
         getNews: [News!]!
@@ -352,11 +352,11 @@ const Types = gql(`
         lastMessage: Message!
     }
 
-    type ChatWithCountUnreadMessages {
+    type ChatResponse {
         chatId: ID!
         countUnreadMessages: Int!
         parnter: ChatUserData!
-        lastMessage: Message!
+        unreadMessages: [Message!]!
     }
 
     input ChatInput {

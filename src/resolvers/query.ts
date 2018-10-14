@@ -6,7 +6,7 @@ import * as investorHelpers from './helpers/investor';
 import Contract from "../models/Contract";
 import Comment, { getCommentData } from "../models/Comment";
 import { getRepostData } from "../models/RePost";
-import Chat, { formatChatDataWithLastMessage } from "../models/Chat";
+import Chat, { formatChatDataWithUnreadMessages } from "../models/Chat";
 import Message, { formatMessageData } from "../models/Message";
 import RePost from "../models/RePost";
 import News, { getNewsData } from "../models/News";
@@ -186,21 +186,21 @@ const QueryImpl = {
           select: 'name'
         } 
       }) as any;
-      // .slice('messages', -1) as any;
 
     const result = chats
       .map(chat => {
         const { _id, members, messages } = chat;
-        const countUnreadMessages = messages.filter(message => !message.read).length;
-        const lastMessage = chat.messages.slice(-1);
+        const unreadMessages = messages
+          .filter(message => !message.read)
+          .sort((a, b) => b.date - a.date);
         return {
           _id,
           members,
-          messages: lastMessage,
-          countUnreadMessages
+          unreadMessages,
+          countUnreadMessages: unreadMessages.length
         }
       })
-      .map(chat => formatChatDataWithLastMessage(chat, userId));
+      .map(chat => formatChatDataWithUnreadMessages(chat, userId));
 
     return result;
   },

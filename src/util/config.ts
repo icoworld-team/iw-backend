@@ -1,4 +1,5 @@
 import * as path from 'path';
+require('dotenv').config();
 
 // Dev mode flag
 export const DEV_MODE = process.env.NODE_ENV === 'development';
