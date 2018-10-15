@@ -20,7 +20,7 @@ const schema = new Schema({
 export function formatChatDataWithUnreadMessages(chat, userId) {
     return {
         ...formatChatData(chat, userId),
-        unreadMessages: chat.unreadMessages.map(message => formatMessageData(message))
+        messages: chat.messages.map(message => formatMessageData(message))
     }
 }
 

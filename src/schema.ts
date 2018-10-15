@@ -356,7 +356,7 @@ const Types = gql(`
         chatId: ID!
         countUnreadMessages: Int!
         parnter: ChatUserData!
-        unreadMessages: [Message!]!
+        messages: [Message!]!
     }
 
     input ChatInput {
