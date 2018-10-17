@@ -2,7 +2,7 @@ import User, { getUserData, getShortUserData } from "../models/user";
 import Pool from "../models/Pool";
 import { getPoolData, getPoolDataForSearchResult } from '../models/Pool';
 import Post, { getPostData } from "../models/Post";
-import * as investorHelpers from './helpers/investor';
+import * as investors from './helpers/investor';
 import Contract from "../models/Contract";
 import Comment, { getCommentData } from "../models/Comment";
 import { getRepostData } from "../models/RePost";
@@ -118,20 +118,19 @@ const QueryImpl = {
     const comments = await Comment.find().where('_id').in(post.comments)
     .populate({
       path: 'userId',
-      select: 'name login'
+      select: 'name login avatar'
     }) as any;
-    return comments.map((cmt => getCommentData(cmt, cmt.userId.name, cmt.userId.login)));
+    return comments.map((cmt => getCommentData(cmt, cmt.userId.name, cmt.userId.login, cmt.userId.avatar)));
   },
 
   getInvestors: async (_, { input }) => {
     const { sortBy, ...filterParams } = input;
-    const searchingParamsObject = investorHelpers.generateSearchingParamsObject(filterParams);
-    const investors = await User
-      .find(searchingParamsObject)
-      .select({ name: 1, subscribers: 1, login: 1, createdAt: 1 });
-    const sortedInvestors = investorHelpers.sortInvestors(investors, sortBy);
-    const formattedInvestors = sortedInvestors.map(investor => investorHelpers.formatInvestor(investor));
-    return formattedInvestors;
+    const params = investors.generateSearchingParams(filterParams);
+    const users = await User
+      .find(params)
+      .select({ name: 1, subscribers: 1, login: 1, avatar: 1, createdAt: 1 });
+    const sorted = investors.sort(users, sortBy);
+    return sorted.map(user => investors.format(user));
   },
 
   getFollows: async (_, { userId }) => {

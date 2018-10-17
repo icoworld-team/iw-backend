@@ -1,4 +1,4 @@
-export function generateSearchingParamsObject(filteredParams) {
+export function generateSearchingParams(filteredParams) {
   const result = {} as any;
 
   if (filteredParams.name !== undefined) {
@@ -28,7 +28,7 @@ export function generateSearchingParamsObject(filteredParams) {
   return result;
 }
 
-export function sortInvestors(investors, sortBy) {
+export function sort(investors, sortBy) {
   switch (sortBy) {
     case 'NUMBER_OF_FOLLOWERS':
       return investors.sort((investors1, investors2) => investors2.subscribers.length - investors1.subscribers.length);
@@ -46,11 +46,12 @@ export function sortInvestors(investors, sortBy) {
 }
 
 // Format investor object
-export function formatInvestor(investor) {
+export function format(investor) {
   return {
       id: investor._id,
       name: investor.name,
       login: investor.login,
+      avatar: investor.avatar,
       countOfFollowers: investor.subscribers.length
   }
 }

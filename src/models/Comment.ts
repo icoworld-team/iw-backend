@@ -19,13 +19,14 @@ const schema = new Schema({
 }, { timestamps: true });
 
 // Compose comment object properties for UI.
-export function getCommentData(item, uname, login) {
+export function getCommentData(item, uname, login, uavatar) {
     return {
         Id: item._id,
         userId: item.userId._id,
         postId: item.postId._id,
         userName: uname,
         userLogin: login,
+        avatar: uavatar,
         date: item.createdAt,
         edited: item.updatedAt,
         content: item.content,

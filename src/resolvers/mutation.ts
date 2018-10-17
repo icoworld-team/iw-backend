@@ -234,7 +234,7 @@ const MutationImpl = {
   createComment: async (_, { input }) => {
     const { userId, postId } = input;
     const comment = await Comment.create(input) as any;
-    const user = await User.findById(userId).select({ name: 1, login: 1 }) as any;
+    const user = await User.findById(userId).select({ name: 1, login: 1, avatar: 1 }) as any;
     const post = await Post.findByIdAndUpdate(postId, { $push: { comments: comment._id } });
     return getCommentData(comment, user.name, user.login);
   },

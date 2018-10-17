@@ -269,6 +269,7 @@ const Types = gql(`
         postId: ID!
         userName: String!
         userLogin: String
+        avatar: ID
         date: String!
         edited: String!
         content: String!
