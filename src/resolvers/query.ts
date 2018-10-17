@@ -6,7 +6,7 @@ import * as investorHelpers from './helpers/investor';
 import Contract from "../models/Contract";
 import Comment, { getCommentData } from "../models/Comment";
 import { getRepostData } from "../models/RePost";
-import Chat, { formatChatDataWithLastMessage } from "../models/Chat";
+import Chat, { formatChatDataWithUnreadMessages } from "../models/Chat";
 import Message, { formatMessageData } from "../models/Message";
 import RePost from "../models/RePost";
 import News, { getNewsData } from "../models/News";
@@ -186,21 +186,29 @@ const QueryImpl = {
           select: 'name'
         } 
       }) as any;
-      // .slice('messages', -1) as any;
 
     const result = chats
       .map(chat => {
         const { _id, members, messages } = chat;
-        const countUnreadMessages = messages.filter(message => !message.read).length;
-        const lastMessage = chat.messages.slice(-1);
+        let resultMessages;
+        let countUnreadMessages;
+        const sortedMessages = [...messages].sort((a, b) => b.date - a.date);
+        let unreadMessages = sortedMessages.filter(message => !message.read);
+        if (unreadMessages.length !== 0) {
+          resultMessages = unreadMessages;
+          countUnreadMessages = unreadMessages.length;
+        } else {
+          resultMessages = [sortedMessages[0]];
+          countUnreadMessages = 0;
+        }
         return {
           _id,
           members,
-          messages: lastMessage,
+          messages: resultMessages,
           countUnreadMessages
         }
       })
-      .map(chat => formatChatDataWithLastMessage(chat, userId));
+      .map(chat => formatChatDataWithUnreadMessages(chat, userId));
 
     return result;
   },
