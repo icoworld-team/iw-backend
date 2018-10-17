@@ -50,7 +50,7 @@ const QueryImpl = {
       .findById(postId)
       .populate({
         path: 'userId',
-        select: 'name login'
+        select: 'name login avatar'
       });
     return post ? getPostData(post) : null;
   },
@@ -60,7 +60,7 @@ const QueryImpl = {
       .find({ content: new RegExp(`.*${searchText}.*`, 'i') })
       .populate({
         path: 'userId',
-        select: 'name login'
+        select: 'name login avatar'
       });
     return posts.map((post => getPostData(post)));
   },
@@ -70,7 +70,7 @@ const QueryImpl = {
     const posts = await Post.find({ content: new RegExp(`.*${searchText}.*`, 'i') }).where('_id').in(user.posts)
       .populate({
         path: 'userId',
-        select: 'name login'
+        select: 'name login avatar'
       });    
     const mappedPosts = posts.map(post => getPostData(post));
 

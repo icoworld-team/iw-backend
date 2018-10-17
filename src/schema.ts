@@ -214,6 +214,7 @@ const Types = gql(`
         userId: ID!
         userName: String!
         userLogin: String
+        avatar: ID
         date: String
         edited: String
         content: String!

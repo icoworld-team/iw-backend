@@ -37,6 +37,7 @@ export function getPostData(post) {
         userId: post.userId._id,
         userName: post.userId.name,
         userLogin: post.userId.login,
+        avatar: post.userId.avatar,
         date: post.createdAt,
         edited: post.updatedAt,
         content: post.content,
