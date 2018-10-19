@@ -12,7 +12,7 @@ const blocksTimeout = process.env.ETH_WAIT_TIMEOUT || 30000;
 const privateKey = process.env.ETH_PRIVATE_KEY || "";
 
 // Read the contracts bundle.
-const source = fs.readFileSync("contracts.json", 'utf8');
+const source = fs.readFileSync('contracts.json', {encoding: 'utf8'});
 const contracts = JSON.parse(source)["contracts"];
 
 /**
@@ -25,7 +25,7 @@ export function getContract(name: string) {
     if(_src.length < 50) {
         const cpath = `${process.cwd}/sol/${_src.trim()}`;
         if(fs.existsSync(cpath))
-            _src = fs.readFileSync(cpath, 'utf8');
+            _src = fs.readFileSync(cpath, {encoding: 'utf8'});
         else
             console.log(`Cannot read source for contract: <${name}>. Path ${cpath} doesn't exists!`);   
     }

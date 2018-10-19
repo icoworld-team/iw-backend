@@ -62,6 +62,7 @@ const Mutation = gql(`
         editComment(input: CommentEditInput!): ID!
         deleteComment(cmtId: ID!): ID!
         createContract(input: ContractInput!): ID!
+        deployContract(name: String!, input: ContractArgs!): ContractData
         deleteContract(id: ID!): ID!
         createNews(title: String!): ID!
         deleteNews(newsId: ID!): ID!
@@ -122,6 +123,16 @@ const Types = gql(`
         verified: Boolean!
         about: String
         language: String
+    }
+
+    type ContractData {
+        source: String!
+        abi: String!
+        address: String!
+    }
+
+    input ContractArgs {
+        args: [String]
     }
 
     input ExpirienceInput {
@@ -250,6 +261,7 @@ const Types = gql(`
         userId: ID!
         userName: String!
         userLogin: String
+        avatar: String
         date: String
         edited: String
         content: String!
@@ -310,6 +322,7 @@ const Types = gql(`
         id: ID!
         name: String!
         login: String
+        avatar: String
         countOfFollowers: Int!
     }
 

@@ -10,7 +10,6 @@ import { Strategy as LocalStrategy } from 'passport-local'
 import { IWError } from './util/IWError';
 import { hash, verify } from './auth/digest';
 import User, { setUserRole, getUserData } from './models/user';
-import { deployContract } from './eth/contracts';
 import admin from './admin';
 import { generateConfirmationUrl, generateEmailBody, sendMail } from './confirmEmail';
 import { decrypt } from './confirmEmail/helpers';
@@ -164,20 +163,6 @@ router.post('/login', async (ctx, next) => {
 router.get('/logout', async (ctx) => {
     await ctx.logout();
     ctx.body = 'logout';
-});
-
-// Contract deploy request handler.
-router.post('/deploy', async (ctx: Koa.Context) => {
-    try {
-        if (ctx.session == undefined || null)
-            throw new IWError(401, "Access denied");
-        const { name, args } = ctx.request.body as any;
-        const data = await deployContract(name, args);
-        ctx.body = { data };
-    } catch (err) {
-        // should be IWError type error.
-        ctx.throw(err.status, err.message);
-    }
 });
 
 router.get('/confirmEmail/:hash', (ctx) => {

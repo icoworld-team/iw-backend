@@ -3,6 +3,7 @@ import { ApolloServer } from 'apollo-server-koa';
 import io from './socket'
 import schema from './schema';
 import database, {close} from './db';
+import { GuestUser } from './auth/permissions';
 
 const path = '/graphql';
 
@@ -11,7 +12,9 @@ const server = new ApolloServer({
   ...schema,
   context: (req) => {
     return {
-      user: req.ctx.state.user
+      user: (req.ctx.state.user) 
+              ? req.ctx.state.user
+              : GuestUser
     }
   }
 });
