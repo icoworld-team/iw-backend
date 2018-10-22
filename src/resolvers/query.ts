@@ -273,8 +273,8 @@ const QueryImpl = {
     checkReadPermission(_News, ctx.user.role);
     const posts = await Post.find().where('createdAt').gte(from).lt(to).select('tags') as any;
     const res = new Map();
-    posts.array.forEach(tags => {
-      tags.array.forEach(tag => {
+    posts.forEach(post => {
+      post.tags.forEach(tag => {
         let num:number = res.get(tag);
         res.set(tag, (num) ? num + 1 : 1);
       });  
