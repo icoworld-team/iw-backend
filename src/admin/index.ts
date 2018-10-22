@@ -1,6 +1,7 @@
 import * as path from 'path';
 import * as Router from 'koa-router';
 import * as pug from 'pug';
+import web3 from '../eth/util';
 import Pool, { Status } from '../models/Pool';
 import { deployContract } from '../eth/contracts';
 
@@ -71,9 +72,22 @@ router.get('/admin/pools/:id/deploy', async (ctx) => {
   const id = ctx.params.id;
   const pool = await Pool.findById(id) as any;
   await changePoolStatus(id, Status.Deploying);
- let error = undefined;
+  let error = undefined;
+  
   try {
-    const args = ["0x007ccffb7916f37f7aeef05e8096ecfbe55afc2f", 100000];
+    const args = [
+      pool.wallet.address,
+      web3.toBigNumber(pool.sum_max),
+      web3.toBigNumber(pool.sum_min),
+      web3.toBigNumber(pool.sum_mbr_max),
+      web3.toBigNumber(pool.sum_mbr_min),
+      pool.comission,
+      pool.lead_comission,
+      pool.comissionPaymentAddress,
+      Number(new Date()), // start
+      Number(new Date()), // period
+      Number(pool.endDate)
+    ];
     const data = await deployContract(pool.contract, args);
     pool.deploy = { abi: data.abi, address: data.address };
     try {
