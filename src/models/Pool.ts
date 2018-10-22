@@ -20,7 +20,7 @@ export const Status = {
 }
 
 // Contract name associated with pool.
-const ContractName = 'TestContract';
+const ContractName = 'InvestPool';
 
 // Pool deployed contract data.
 const ContractData = new mongoose.Schema({

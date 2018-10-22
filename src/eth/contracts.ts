@@ -67,7 +67,7 @@ async function waitForBlocks(contract, timeout) {
  * @param name
  * @param args 
  */
-export async function deployContract(name: string, ...args) {
+export async function deployContract(name: string, args) {
     notNull(name, 'Contract name');
     web3.personal.unlockAccount(accountAddr, privateKey, 60000);
     console.log("Unlock the account...");
@@ -77,7 +77,7 @@ export async function deployContract(name: string, ...args) {
     const factory = web3.eth.contract(abi);
     console.log("Deploying the contract...");
     // Deploy the contract.
-    const contract = factory.new(args, {from: accountAddr, gas: priceGas, data: bin});
+    const contract = factory.new(...args, { from: accountAddr, gas: priceGas, data: bin });
     // Transaction has entered to memory pool
     console.log(`Contract is being deployed in transaction at ${ethUrl}, hash: ${contract.transactionHash}`);
     const encAbi = factory.new.getData(args, {data: bin});
