@@ -33,20 +33,20 @@ const Query = gql(`
 const Mutation = gql(`
     type Mutation {
         uploadFile(file: Upload!): ID!
-        addWallet(userId:ID!, addr:String!): ID!
-        removeWallet(userId:ID!, id:ID!): Boolean!
-        addEducation(userId: ID!, input: ExpirienceInput!): ID!
-        updateEducation(userId: ID!, id: ID! input: ExpirienceInput!): Boolean!
-        removeEducation(userId:ID!, id:ID!): Boolean!
-        addJob(userId: ID!, input:ExpirienceInput!): ID!
-        updateJob(userId: ID!, id: ID! input: ExpirienceInput!): Boolean!
-        removeJob(userId:ID!, id:ID!): Boolean!
+        addWallet(addr:String!): ID!
+        removeWallet(id:ID!): Boolean!
+        addEducation(input: ExpirienceInput!): ID!
+        updateEducation(id: ID! input: ExpirienceInput!): Boolean!
+        removeEducation(id:ID!): Boolean!
+        addJob( input:ExpirienceInput!): ID!
+        updateJob(id: ID! input: ExpirienceInput!): Boolean!
+        removeJob(id:ID!): Boolean!
         updateUser(input: UserInput!): User!
         deleteUser(id: ID!): ID!
         followUser(userId: ID!, fanId: ID!): ID!
         unfollowUser(userId: ID!, fanId: ID!): Boolean!
-        setPMSendersMode(userId: ID!, mode: String!): Boolean!
-        setCommentersMode(userId: ID!, mode: String!): Boolean!
+        setPMSendersMode(mode: String!): Boolean!
+        setCommentersMode(mode: String!): Boolean!
         makeTopUser(userId: ID!, flag: Boolean!): Boolean!
         createPool(input: PoolInput!): PoolCreateResponse!
         createPost(input: PostInput!): Post!
@@ -151,7 +151,6 @@ const Types = gql(`
     }
 
     input UserInput {
-        id: ID!
         login: String
         name: String
         email: String

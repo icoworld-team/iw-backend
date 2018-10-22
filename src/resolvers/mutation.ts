@@ -44,98 +44,110 @@ const MutationImpl = {
     return id;
   },
 
-  addWallet: async (_, { userId, addr}, ctx) => {
+  addWallet: async (_, { addr}, ctx) => {
     checkCreatePermission(_Profile, ctx.user.role);
-    const user = await User.findById(userId).select('wallets') as any;
+    const user = await User.findById(ctx.user._id).select('wallets') as any;
     const wallet = user.wallets.create({address: addr});
     user.wallets.push(wallet);
     user.save();
     return wallet._id;
   },
 
-  removeWallet: async (_, { userId, id}, ctx) => {
+  removeWallet: async (_, { id}, ctx) => {
     checkDeletePermission(_Profile, ctx.user.role);
-    const user = await User.findById(userId).select('wallets') as any;
+    const user = await User.findById(ctx.user._id).select('wallets') as any;
     user.wallets.pull(id);
     user.save();
     return true;
   },
 
-  addEducation: async (_, { userId, input }, ctx) => {
+  addEducation: async (_, { input }, ctx) => {
     checkCreatePermission(_Profile, ctx.user.role);
-    const user = await User.findById(userId).select('educations') as any;
+    const user = await User.findById(ctx.user._id).select('educations') as any;
     const obj = user.educations.create(input);
     user.educations.push(obj);
     user.save();
     return obj._id;
   },
 
-  updateEducation: async (_, { userId, id, input }, ctx) => {
+  updateEducation: async (_, { id, input }, ctx) => {
     checkEditPermission(_Profile, ctx.user.role);
-    const user = await User.findById(userId).select('educations') as any;
+    const user = await User.findById(ctx.user._id).select('educations') as any;
     const obj = user.educations.id(id);
     obj.set(input);
     user.save();
     return true;
   },
 
-  removeEducation: async (_, { userId, id}, ctx) => {
+  removeEducation: async (_, { id}, ctx) => {
     checkDeletePermission(_Profile, ctx.user.role);
-    const user = await User.findById(userId).select('educations') as any;
+    const user = await User.findById(ctx.user._id).select('educations') as any;
     user.educations.pull(id);
     user.save();
     return true;
   },
 
-  addJob: async (_, { userId, input }, ctx) => {
+  addJob: async (_, { input }, ctx) => {
     checkCreatePermission(_Profile, ctx.user.role);
-    const user = await User.findById(userId).select('jobs') as any;
+    const user = await User.findById(ctx.user._id).select('jobs') as any;
     const obj = user.jobs.create(input);
     user.jobs.push(obj);
     user.save();
     return obj._id;
   },
 
-  updateJob: async (_, { userId, id, input }, ctx) => {
+  updateJob: async (_, { id, input }, ctx) => {
     checkEditPermission(_Profile, ctx.user.role);
-    const user = await User.findById(userId).select('jobs') as any;
+    const user = await User.findById(ctx.user._id).select('jobs') as any;
     const obj = user.jobs.id(id);
     obj.set(input);
     user.save();
     return true;
   },
 
-  removeJob: async (_, { userId, id}, ctx) => {
+  removeJob: async (_, { id}, ctx) => {
     checkDeletePermission(_Profile, ctx.user.role);
-    const user = await User.findById(userId).select('jobs') as any;
+    const user = await User.findById(ctx.user._id).select('jobs') as any;
     user.jobs.pull(id);
     user.save();
     return true;
   },
 
+  setPMSendersMode: async (_, { mode }, ctx) => {
+    checkEditPermission(_Profile, ctx.user.role);
+    const updated = await User.findByIdAndUpdate(ctx.user._id, { pmsenders: mode });
+    return true;
+  },
+
+  setCommentersMode: async (_, { mode }, ctx) => {
+    checkEditPermission(_Profile, ctx.user.role);
+    const updated = await User.findByIdAndUpdate(ctx.user._id, { commenters: mode });
+    return true;
+  },
+
   updateUser: async (_, { input }, ctx) => {
     checkEditPermission(_Profile, ctx.user.role);
-    const { id, ...userData } = input;
-    const login = userData['login'];
+    const id = ctx.user._id.toString();
+    const login = input['login'];
     if (login) {
       const user = await User.findOne({ login });
       if (user && user._id.toString() !== id) {
         throw new Error(`User with the same login already exists: ${login}`);
       }
     }
-    const phone = userData['phone'];
+    const phone = input['phone'];
     if (phone) {
       const user = await User.findOne({ phone });
       if (user && user._id.toString() !== id) {
         throw new Error(`User with the same phone already exists: ${phone}`);
       }
     }
-    const updatedUser = await User.findByIdAndUpdate(id, userData, { new: true });
+    const updatedUser = await User.findByIdAndUpdate(id, input, { new: true });
     return updatedUser;
   },
 
   deleteUser: async (_, { Id }, ctx) => {
-    checkDeletePermission(_Profile, ctx.user.role);
+    checkDeletePermission(_Profile, ctx.user.role, Id === ctx.user._id.toString());
     const removed = await User.findByIdAndRemove(Id);
     return removed._id;
   },
@@ -151,18 +163,6 @@ const MutationImpl = {
     checkEditPermission(_Profile, ctx.user.role);
     const updatedUser = await User.findByIdAndUpdate(userId, { $pull: { subscribers: fanId } });
     const updatedFan = await User.findByIdAndUpdate(fanId, { $pull: { follows: userId } });
-    return true;
-  },
-
-  setPMSendersMode: async (_, { userId, mode }, ctx) => {
-    checkEditPermission(_Profile, ctx.user.role);
-    const updated = await User.findByIdAndUpdate(userId, { pmsenders: mode });
-    return true;
-  },
-
-  setCommentersMode: async (_, { userId, mode }, ctx) => {
-    checkEditPermission(_Profile, ctx.user.role);
-    const updated = await User.findByIdAndUpdate(userId, { commenters: mode });
     return true;
   },
 
@@ -281,7 +281,7 @@ const MutationImpl = {
     return removed._id;
   },
 
-  createContract: async (_, { input: input }, ctx) => {
+  createContract: async (_, { input }, ctx) => {
     checkCreatePermission(_Contracts, ctx.user.role);
     const contract = await Contract.create(input);
     return contract._id;

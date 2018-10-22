@@ -2,18 +2,12 @@ import { notNull } from '../util/common';
 import { IWError } from '../util/IWError';
 import { DEV_MODE } from '../util/config';
 
-// Available permissions values.
-const Read = 1;
-const Create = 2;
-const Edit = 4;
-const Delete = 8;
-
 // Available permissions.
 const Permissions = new function() {
-    this.R = Read;    // Read
-    this.W = Create;  // Create
-    this.E = Edit;    // Edit
-    this.D = Delete;  // Delete
+    this.R = 1;  // Read
+    this.W = 2;  // Create
+    this.E = 4;  // Edit
+    this.D = 8;  // Delete
     this.M = this.R | this.E | this.D;  // Moderation
     this.X = this.M | this.W  // Full access
 }
@@ -119,7 +113,7 @@ function hasPermission(action: number, section: number, role: string): boolean {
  * @param role 
  */
 export function hasReadPermission(section: number, role: string): boolean {
-    return hasPermission(Read, section, role);
+    return hasPermission(Permissions.R, section, role);
 }
 
 /**
@@ -128,7 +122,7 @@ export function hasReadPermission(section: number, role: string): boolean {
  * @param role 
  */
 export function hasCreatePermission(section: number, role: string): boolean {
-    return hasPermission(Create, section, role);
+    return hasPermission(Permissions.W, section, role);
 }
 
 /**
@@ -137,7 +131,7 @@ export function hasCreatePermission(section: number, role: string): boolean {
  * @param role 
  */
 export function hasEditPermission(section: number, role: string): boolean {
-    return hasPermission(Edit, section, role);
+    return hasPermission(Permissions.E, section, role);
 }
 
 /**
@@ -146,7 +140,16 @@ export function hasEditPermission(section: number, role: string): boolean {
  * @param role 
  */
 export function hasDeletePermission(section: number, role: string): boolean {
-    return hasPermission(Delete, section, role);
+    return hasPermission(Permissions.D, section, role);
+}
+
+/**
+ * Check if a given 'role' has moderation permission.
+ * @param section 
+ * @param role 
+ */
+export function hasModeratePermission(section: number, role: string): boolean {
+    return hasPermission(Permissions.M, section, role);
 }
 
 /**
@@ -184,7 +187,20 @@ export function checkEditPermission(section: number, role: string): void {
  * @param section 
  * @param role 
  */
-export function checkDeletePermission(section: number, role: string): void {
-    if(!hasDeletePermission(section, role))
+export function checkDeletePermission(section: number, role: string, sameIds: boolean = true): void {
+    const hasPerm = (sameIds)
+         ? hasDeletePermission(section, role)
+         : hasModeratePermission(section, role);
+    if(!hasPerm)     
+        throw new IWError(405, 'No permissions');
+}
+
+/**
+ * Check if a given 'role' has moderate permission.
+ * @param section 
+ * @param role 
+ */
+export function checkModeratePermission(section: number, role: string): void {
+    if(!hasModeratePermission(section, role))
         throw new IWError(405, 'No permissions');
 }
