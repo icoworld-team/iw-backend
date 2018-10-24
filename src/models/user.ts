@@ -20,11 +20,7 @@ const schema = new Schema({
     email: {
         type: String,
         required: true,
-        // unique: true
-        /* index: {
-            unique: true,
-            sparse: true
-        } */
+        unique: true
     },
     role: {
         type: String,
