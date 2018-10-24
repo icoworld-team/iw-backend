@@ -152,15 +152,17 @@ const MutationImpl = {
     return removed._id;
   },
 
-  followUser: async (_, { userId, fanId }, ctx) => {
+  followUser: async (_, { userId }, ctx) => {
     checkEditPermission(_Profile, ctx.user.role);
+    const fanId = ctx.user._id;
     const updatedUser = await User.findByIdAndUpdate(userId, { $push: { subscribers: fanId } });
     const updatedFan = await User.findByIdAndUpdate(fanId, { $push: { follows: userId } });
     return updatedFan._id;
   },
 
-  unfollowUser: async (_, { userId, fanId }, ctx) => {
+  unfollowUser: async (_, { userId }, ctx) => {
     checkEditPermission(_Profile, ctx.user.role);
+    const fanId = ctx.user._id;
     const updatedUser = await User.findByIdAndUpdate(userId, { $pull: { subscribers: fanId } });
     const updatedFan = await User.findByIdAndUpdate(fanId, { $pull: { follows: userId } });
     return true;
@@ -206,20 +208,19 @@ const MutationImpl = {
     return getPostDataForEditResponse(updatedPost);
   },
 
-  deletePost: async (_, { postId }, ctx) => {
-    const post = await Post.findById(postId).select('userId') as any;
+  deletePost: async (_, { id }, ctx) => {
+    const post = await Post.findById(id).select('userId') as any;
     const equals = post.userId.toString() === ctx.user._id.toString();
     checkDeletePermission(_Posts, ctx.user.role, equals);
     post.remove();
     return true;
   },
 
-  likePost: async (_, { input }, ctx) => {
+  likePost: async (_, { id, like }, ctx) => {
     checkEditPermission(_Profile, ctx.user.role);
-    const { userId, postId, like } = input;
     const updatedPost = like
-            ? await Post.findByIdAndUpdate(postId, { $push: { likes: userId } }, { new: true }) as any
-            : await Post.findByIdAndUpdate(postId, { $pull: { likes: userId } }, { new: true }) as any
+            ? await Post.findByIdAndUpdate(id, { $push: { likes: ctx.user._id } }, { new: true }) as any
+            : await Post.findByIdAndUpdate(id, { $pull: { likes: ctx.user._id } }, { new: true }) as any
     return updatedPost.likes.length;
   },
 
@@ -229,20 +230,20 @@ const MutationImpl = {
     return id;
   },
 
-  rePost: async (_, { userId, postId }, ctx) => {
+  rePost: async (_, { postId }, ctx) => {
     checkEditPermission(_Profile, ctx.user.role);
-    const repostData = { userId, postId };
+    const repostData = { userId: ctx.user._id, postId };
     const repost = await RePost.create(repostData);
-    const updated = await User.findByIdAndUpdate(userId, { $push: { reposts: repost._id } }, { new: true })
+    const updated = await User.findByIdAndUpdate(ctx.user._id, { $push: { reposts: repost._id } }, { new: true })
       .select('reposts') as any;
     return updated.reposts.length;
   },
 
-  likeRePost: async (_, { id, userId, like }, ctx) => {
+  likeRePost: async (_, { id, like }, ctx) => {
     checkEditPermission(_Profile, ctx.user.role);
     const updated = like
-            ? await RePost.findByIdAndUpdate(id, { $push: { likes: userId } }, { new: true }) as any
-            : await RePost.findByIdAndUpdate(id, { $pull: { likes: userId } }, { new: true }) as any
+            ? await RePost.findByIdAndUpdate(id, { $push: { likes: ctx.user._id } }, { new: true }) as any
+            : await RePost.findByIdAndUpdate(id, { $pull: { likes: ctx.user._id } }, { new: true }) as any
     return updated.likes.length;
   },
 
@@ -267,19 +268,17 @@ const MutationImpl = {
     return true;
   },
 
-  createComment: async (_, { input }, ctx) => {
+  createComment: async (_, { postId, content }, ctx) => {
     checkCreatePermission(_Comments, ctx.user.role);
-    const { userId, postId } = input;
-    const comment = await Comment.create(input) as any;
-    const user = await User.findById(userId).select({ name: 1, login: 1, avatar: 1 }) as any;
+    const comment = await Comment.create({ userId: ctx.user._id, postId, content }) as any;
+    const user = await User.findById(ctx.user._id).select({ name: 1, login: 1, avatar: 1 }) as any;
     const post = await Post.findByIdAndUpdate(postId, { $push: { comments: comment._id } });
     return getCommentData(comment, user.name, user.login, user.avatar);
   },
 
-  editComment: async (_, { input }, ctx) => {
+  editComment: async (_, { cmtId, content }, ctx) => {
     checkEditPermission(_Comments, ctx.user.role);
-    const { cmtId, ...data } = input;
-    const updated = await Comment.findByIdAndUpdate(cmtId, data, { new: true });
+    const updated = await Comment.findByIdAndUpdate(cmtId, content, { new: true });
     return updated._id;
   },
 

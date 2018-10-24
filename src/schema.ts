@@ -43,24 +43,24 @@ const Mutation = gql(`
         removeJob(id:ID!): Boolean!
         updateUser(input: UserInput!): User!
         deleteUser(id: ID!): ID!
-        followUser(userId: ID!, fanId: ID!): ID!
-        unfollowUser(userId: ID!, fanId: ID!): Boolean!
+        followUser(userId: ID!): ID!
+        unfollowUser(userId: ID!): Boolean!
         setPMSendersMode(mode: String!): Boolean!
         setCommentersMode(mode: String!): Boolean!
         makeTopUser(userId: ID!, flag: Boolean!): Boolean!
         createPool(input: PoolInput!): PoolCreateResponse!
         createPost(input: PostInput!): Post!
         editPost(input: PostEditInput!): PostEditResponse!
-        deletePost(postId: ID!): Boolean!
-        likePost(input: PostLikeInput!): Int!
+        deletePost(id: ID!): Boolean!
+        likePost(id: ID!, like: Boolean!): Int!
         pinPost(id:ID!): ID!
-        rePost(userId: ID!, postId: ID!): Int!
-        likeRePost(id: ID!,  userId: ID!, like: Boolean!): Int!
+        rePost(postId: ID!): Int!
+        likeRePost(id: ID!, like: Boolean!): Int!
         deleteRePost(id: ID!): Boolean!
         addImage(postId: ID, imageId: ID): Boolean!
         removeImage(postId: ID, imageId: ID, del: Boolean): Boolean!
-        createComment(input: CommentInput!): Comment!
-        editComment(input: CommentEditInput!): ID!
+        createComment(postId: ID!, content: String!): Comment!
+        editComment(cmtId: ID!, content: String!): ID!
         deleteComment(cmtId: ID!): ID!
         createContract(input: ContractInput!): ID!
         deployContract(name: String!, input: ContractArgs!): ContractData
@@ -250,12 +250,6 @@ const Types = gql(`
         tags: [String!]
     }
 
-    input PostLikeInput {
-        userId: ID!
-        postId: ID!
-        like: Boolean!
-    }
-
     type Repost {
         id: ID!
         postId: ID!
@@ -285,17 +279,6 @@ const Types = gql(`
         avatar: ID
         date: String!
         edited: String!
-        content: String!
-    }
-
-    input CommentInput {
-        userId: ID!
-        postId: ID!
-        content: String!
-    }
-
-    input CommentEditInput {
-        cmtId: ID!
         content: String!
     }
 
