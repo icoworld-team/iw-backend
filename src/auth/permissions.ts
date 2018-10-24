@@ -2,6 +2,9 @@ import { notNull } from '../util/common';
 import { IWError } from '../util/IWError';
 import { DEV_MODE } from '../util/config';
 
+// No permissions message.
+const NO_PERMISSIONS = 'You has NOT enough permissions to complete the request!';
+
 // Available permissions.
 const Permissions = new function() {
     this.R = 1;  // Read
@@ -159,7 +162,7 @@ export function hasModeratePermission(section: number, role: string): boolean {
  */
 export function checkReadPermission(section: number, role: string): void {
     if(!hasReadPermission(section, role))
-        throw new IWError(405, 'No permissions');
+        throw new IWError(405, NO_PERMISSIONS);
 }
 
 /**
@@ -169,7 +172,7 @@ export function checkReadPermission(section: number, role: string): void {
  */
 export function checkCreatePermission(section: number, role: string): void {
     if(!hasCreatePermission(section, role))
-        throw new IWError(405, 'No permissions');
+        throw new IWError(405, NO_PERMISSIONS);
 }
 
 /**
@@ -179,7 +182,7 @@ export function checkCreatePermission(section: number, role: string): void {
  */
 export function checkEditPermission(section: number, role: string): void {
     if(!hasEditPermission(section, role))
-        throw new IWError(405, 'No permissions');
+        throw new IWError(405, NO_PERMISSIONS);
 }
 
 /**
@@ -192,7 +195,7 @@ export function checkDeletePermission(section: number, role: string, sameIds: bo
          ? hasDeletePermission(section, role)
          : hasModeratePermission(section, role);
     if(!hasPerm)     
-        throw new IWError(405, 'No permissions');
+        throw new IWError(405, NO_PERMISSIONS);
 }
 
 /**
@@ -202,5 +205,5 @@ export function checkDeletePermission(section: number, role: string, sameIds: bo
  */
 export function checkModeratePermission(section: number, role: string): void {
     if(!hasModeratePermission(section, role))
-        throw new IWError(405, 'No permissions');
+        throw new IWError(405, NO_PERMISSIONS);
 }

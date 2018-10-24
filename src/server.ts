@@ -30,10 +30,9 @@ function cleanup(code:number) {
     return;
   }
   close();
-  console.log('Process will exit in 5 seconds');
-  exitTimeout = setTimeout(process.exit, 5000);
   server.stop();
-  process.exit(code);
+  console.log('Process will exit in 5 seconds');
+  exitTimeout = setTimeout(process.exit, 5000, code);
 }
 // Setup handlers for various termination signals.
 process.on('SIGTERM', () => {

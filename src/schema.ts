@@ -51,8 +51,9 @@ const Mutation = gql(`
         createPool(input: PoolInput!): PoolCreateResponse!
         createPost(input: PostInput!): Post!
         editPost(input: PostEditInput!): PostEditResponse!
-        deletePost(postId: ID!): ID!
+        deletePost(postId: ID!): Boolean!
         likePost(input: PostLikeInput!): Int!
+        pinPost(id:ID!): ID!
         rePost(userId: ID!, postId: ID!): Int!
         likeRePost(id: ID!,  userId: ID!, like: Boolean!): Int!
         deleteRePost(id: ID!): Boolean!
@@ -119,6 +120,7 @@ const Types = gql(`
         pmsenders: String!
         commenters: String!
         twoFactorAuth: Boolean
+        pined_post: ID
         top: Boolean!
         verified: Boolean!
         about: String

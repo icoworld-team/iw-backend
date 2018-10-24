@@ -207,9 +207,11 @@ const MutationImpl = {
   },
 
   deletePost: async (_, { postId }, ctx) => {
-    checkDeletePermission(_Posts, ctx.user.role);
-    const deletedPost = await Post.findByIdAndRemove(postId);
-    return deletedPost._id;
+    const post = await Post.findById(postId).select('userId') as any;
+    const equals = post.userId.toString() === ctx.user._id.toString();
+    checkDeletePermission(_Posts, ctx.user.role, equals);
+    post.remove();
+    return true;
   },
 
   likePost: async (_, { input }, ctx) => {
@@ -219,6 +221,12 @@ const MutationImpl = {
             ? await Post.findByIdAndUpdate(postId, { $push: { likes: userId } }, { new: true }) as any
             : await Post.findByIdAndUpdate(postId, { $pull: { likes: userId } }, { new: true }) as any
     return updatedPost.likes.length;
+  },
+
+  pinPost: async (_, {id}, ctx) => {
+    checkEditPermission(_Profile, ctx.user.role);
+    await User.findByIdAndUpdate(ctx.user._id, {$set:{ pined_post: id }});
+    return id;
   },
 
   rePost: async (_, { userId, postId }, ctx) => {

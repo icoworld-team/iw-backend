@@ -71,6 +71,10 @@ const schema = new Schema({
             default: ""
         }
     },
+    pined_post: {
+        type: ObjectId,
+        ref: 'Post'
+    },
     posts: [{
         type: ObjectId,
         ref: 'Post'
@@ -181,6 +185,7 @@ export function getUserData(user) {
         commenters: user.commenters,
         twoFactorAuth: user.twoFactorAuth,
         notifications: user.notifications,
+        pined_post: user.pined_post,
         top: user.top,
         verified: user.verified,
         about: user.about,
