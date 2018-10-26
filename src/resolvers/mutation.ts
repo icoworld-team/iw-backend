@@ -224,10 +224,12 @@ const MutationImpl = {
     return updatedPost.likes.length;
   },
 
-  pinPost: async (_, {id}, ctx) => {
+  pinPost: async (_, {id, pin}, ctx) => {
     checkEditPermission(_Profile, ctx.user.role);
-    await User.findByIdAndUpdate(ctx.user._id, {$set:{ pined_post: id }});
-    return id;
+    const update = (pin) 
+            ? await User.findByIdAndUpdate(ctx.user._id, {$set:{ pined_post: id }})
+            : await User.findByIdAndUpdate(ctx.user._id, {$unset:{ pined_post: "" }});
+    return update._id;
   },
 
   rePost: async (_, { postId }, ctx) => {
