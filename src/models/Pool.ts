@@ -20,7 +20,7 @@ export const Status = {
 }
 
 // Contract name associated with pool.
-const ContractName = 'TestContract';
+const ContractName = 'InvestPool';
 
 // Pool deployed contract data.
 const ContractData = new mongoose.Schema({
@@ -57,10 +57,10 @@ const schema = new Schema({
     /* description: String, */
     projectLink: String,
     wallet: Wallet,
-    sum_min: Number,
-    sum_max: Number,
-    sum_mbr_min: Number,
-    sum_mbr_max: Number,
+    sum_min: String,
+    sum_max: String,
+    sum_mbr_min: String,
+    sum_mbr_max: String,
     endDate: Date,
     comissionPaymentAddress: String,
     comission: Number,

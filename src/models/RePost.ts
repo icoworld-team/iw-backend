@@ -26,10 +26,12 @@ const schema = new Schema({
 // Compose repost object properties for UI
 export function getRepostData(post, value) {
     return {
+        id: value.id,
         postId: post._id,
         userId: post.userId._id,
         userName: post.userId.name,
         userLogin: post.userId.login,
+        avatar: post.userId.avatar,
         date: post.createdAt,
         edited: post.updatedAt,
         content: post.content,

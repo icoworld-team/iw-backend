@@ -1,7 +1,10 @@
 import mongoose = require('mongoose');
+import { DEV_MODE, DB_MAX_CONNS } from './util/config';
 require('dotenv').config();
 
 const DB_URI = process.env.DB_URI;
+console.log('DB_URI')
+console.log(DB_URI)
 
 // Setup DB.
 const dbOptions = {
@@ -9,7 +12,7 @@ const dbOptions = {
 	autoIndex: false, // Don't build indexes
 	reconnectTries: Number.MAX_VALUE, // Never stop trying to reconnect
 	reconnectInterval: 500, // Reconnect every 500ms
-	poolSize: 2, // Maintain up to 2 socket connections
+	poolSize: DB_MAX_CONNS, // Maintain up to 2 socket connections
 	// If not connected, return errors immediately rather than waiting for reconnect
 	bufferMaxEntries: 0,
 	connectTimeoutMS: 10000, // Give up initial connection after 10 seconds
@@ -17,7 +20,7 @@ const dbOptions = {
 	family: 4 // Use IPv4, skip trying IPv6
 };
 
-mongoose.set('debug', process.env.NODE_ENV === 'development');
+mongoose.set('debug', DEV_MODE);
 const db = mongoose.connection;
 
 export function close() {
@@ -32,9 +35,9 @@ export default async () => {
 		.once('open', () => console.log('Established connection to DB.'));
 	
 	const dbObj = await mongoose.connect(DB_URI, dbOptions);
-	/* const modelNames = ['User'];
+	const modelNames = ['User'];
 	modelNames.forEach(async (modelName) => {
 		await mongoose.models[modelName].ensureIndexes();
-	}) */
+	});
 	return dbObj;
 };

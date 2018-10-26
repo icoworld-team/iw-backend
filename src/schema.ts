@@ -21,7 +21,7 @@ const Query = gql(`
         getComments(postId: ID!): [Comment]!
         getInvestors(input: InvestorsFilterParamsInput!): [Investor!]!
         getContracts(input: ContractsParamsInput!): [Contract]!
-        getChats(userId: ID!): [Chat!]!
+        getChats(userId: ID!): [ChatResponse!]!
         getChatMessages(input: ChatInput!): ChatMessagesResponse!
         searchChat(userId: ID!, searchText: String!): [Chat!]!
         getNews: [News!]!
@@ -32,36 +32,38 @@ const Query = gql(`
 // Mutation definition.
 const Mutation = gql(`
     type Mutation {
-        uploadFile(userId: ID!, file: Upload!): ID!
-        addWallet(userId:ID!, addr:String!): ID!
-        removeWallet(userId:ID!, id:ID!): Boolean!
-        addEducation(userId: ID!, input: ExpirienceInput!): ID!
-        updateEducation(userId: ID!, id: ID! input: ExpirienceInput!): Boolean!
-        removeEducation(userId:ID!, id:ID!): Boolean!
-        addJob(userId: ID!, input:ExpirienceInput!): ID!
-        updateJob(userId: ID!, id: ID! input: ExpirienceInput!): Boolean!
-        removeJob(userId:ID!, id:ID!): Boolean!
+        uploadFile(file: Upload!): ID!
+        addWallet(addr:String!): ID!
+        removeWallet(id:ID!): Boolean!
+        addEducation(input: ExpirienceInput!): ID!
+        updateEducation(id: ID! input: ExpirienceInput!): Boolean!
+        removeEducation(id:ID!): Boolean!
+        addJob( input:ExpirienceInput!): ID!
+        updateJob(id: ID! input: ExpirienceInput!): Boolean!
+        removeJob(id:ID!): Boolean!
         updateUser(input: UserInput!): User!
         deleteUser(id: ID!): ID!
-        followUser(userId: ID!, fanId: ID!): ID!
-        unfollowUser(userId: ID!, fanId: ID!): Boolean!
-        setPMSendersMode(userId: ID!, mode: String!): Boolean!
-        setCommentersMode(userId: ID!, mode: String!): Boolean!
+        followUser(userId: ID!): ID!
+        unfollowUser(userId: ID!): Boolean!
+        setPMSendersMode(mode: String!): Boolean!
+        setCommentersMode(mode: String!): Boolean!
         makeTopUser(userId: ID!, flag: Boolean!): Boolean!
         createPool(input: PoolInput!): PoolCreateResponse!
         createPost(input: PostInput!): Post!
         editPost(input: PostEditInput!): PostEditResponse!
-        deletePost(postId: ID!): ID!
-        likePost(input: PostLikeInput!): Int!
-        rePost(userId: ID!, postId: ID!): Int!
-        likeRePost(id: ID!,  userId: ID!, like: Boolean!): Int!
+        deletePost(id: ID!): Boolean!
+        likePost(id: ID!, like: Boolean!): Int!
+        pinPost(id:ID!): ID!
+        rePost(postId: ID!): Int!
+        likeRePost(id: ID!, like: Boolean!): Int!
         deleteRePost(id: ID!): Boolean!
         addImage(postId: ID, imageId: ID): Boolean!
         removeImage(postId: ID, imageId: ID, del: Boolean): Boolean!
-        createComment(input: CommentInput!): Comment!
-        editComment(input: CommentEditInput!): ID!
+        createComment(postId: ID!, content: String!): Comment!
+        editComment(cmtId: ID!, content: String!): ID!
         deleteComment(cmtId: ID!): ID!
         createContract(input: ContractInput!): ID!
+        deployContract(name: String!, input: ContractArgs!): ContractData
         deleteContract(id: ID!): ID!
         createNews(title: String!): ID!
         deleteNews(newsId: ID!): ID!
@@ -71,6 +73,7 @@ const Mutation = gql(`
 // Types definition.
 const Types = gql(`
     type File {
+        id: ID!
         filename: String!
         mimetype: String!
         encoding: String!
@@ -104,6 +107,8 @@ const Types = gql(`
         login: String
         email: String!
         phone: String
+        photo: ID
+        avatar: ID
         country: String
         city: String
         site: String
@@ -115,10 +120,21 @@ const Types = gql(`
         pmsenders: String!
         commenters: String!
         twoFactorAuth: Boolean
+        pined_post: ID
         top: Boolean!
         verified: Boolean!
         about: String
         language: String
+    }
+
+    type ContractData {
+        source: String!
+        abi: String!
+        address: String!
+    }
+
+    input ContractArgs {
+        args: [String]
     }
 
     input ExpirienceInput {
@@ -137,7 +153,6 @@ const Types = gql(`
     }
 
     input UserInput {
-        id: ID!
         login: String
         name: String
         email: String
@@ -211,6 +226,7 @@ const Types = gql(`
         userId: ID!
         userName: String!
         userLogin: String
+        avatar: ID
         date: String
         edited: String
         content: String!
@@ -234,28 +250,19 @@ const Types = gql(`
         tags: [String!]
     }
 
-    input PostLikeInput {
-        userId: ID!
-        postId: ID!
-        like: Boolean!
-    }
-
-    type RepostLike {
-        name: String!
-        login: String
-    }
-
     type Repost {
+        id: ID!
         postId: ID!
         userId: ID!
         userName: String!
         userLogin: String
+        avatar: String
         date: String
         edited: String
         content: String!
         tags: [String!]!
         reposted: String
-        likes: [RepostLike]
+        likes: [ID]
     }
 
     type SearchPostInProfileResponse {
@@ -269,19 +276,9 @@ const Types = gql(`
         postId: ID!
         userName: String!
         userLogin: String
+        avatar: ID
         date: String!
         edited: String!
-        content: String!
-    }
-
-    input CommentInput {
-        userId: ID!
-        postId: ID!
-        content: String!
-    }
-
-    input CommentEditInput {
-        cmtId: ID!
         content: String!
     }
 
@@ -309,6 +306,7 @@ const Types = gql(`
         id: ID!
         name: String!
         login: String
+        avatar: String
         countOfFollowers: Int!
     }
 
@@ -353,6 +351,13 @@ const Types = gql(`
         lastMessage: Message!
     }
 
+    type ChatResponse {
+        chatId: ID!
+        countUnreadMessages: Int!
+        parnter: ChatUserData!
+        messages: [Message!]!
+    }
+
     input ChatInput {
         chatId: ID!
         skip: Int!
@@ -379,6 +384,7 @@ const config: Config = {
         Query: QueryImpl,
         Mutation: MutationImpl
     },
+    uploads: true
 };
 
 export default config;

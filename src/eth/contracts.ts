@@ -12,7 +12,7 @@ const blocksTimeout = process.env.ETH_WAIT_TIMEOUT || 30000;
 const privateKey = process.env.ETH_PRIVATE_KEY || "";
 
 // Read the contracts bundle.
-const source = fs.readFileSync("contracts.json", 'utf8');
+const source = fs.readFileSync('contracts.json', {encoding: 'utf8'});
 const contracts = JSON.parse(source)["contracts"];
 
 /**
@@ -25,7 +25,7 @@ export function getContract(name: string) {
     if(_src.length < 50) {
         const cpath = `${process.cwd}/sol/${_src.trim()}`;
         if(fs.existsSync(cpath))
-            _src = fs.readFileSync(cpath, 'utf8');
+            _src = fs.readFileSync(cpath, {encoding: 'utf8'});
         else
             console.log(`Cannot read source for contract: <${name}>. Path ${cpath} doesn't exists!`);   
     }
@@ -67,7 +67,7 @@ async function waitForBlocks(contract, timeout) {
  * @param name
  * @param args 
  */
-export async function deployContract(name: string, ...args) {
+export async function deployContract(name: string, args) {
     notNull(name, 'Contract name');
     web3.personal.unlockAccount(accountAddr, privateKey, 60000);
     console.log("Unlock the account...");
@@ -77,7 +77,7 @@ export async function deployContract(name: string, ...args) {
     const factory = web3.eth.contract(abi);
     console.log("Deploying the contract...");
     // Deploy the contract.
-    const contract = factory.new(args, {from: accountAddr, gas: priceGas, data: bin});
+    const contract = factory.new(...args, { from: accountAddr, gas: priceGas, data: bin });
     // Transaction has entered to memory pool
     console.log(`Contract is being deployed in transaction at ${ethUrl}, hash: ${contract.transactionHash}`);
     const encAbi = factory.new.getData(args, {data: bin});

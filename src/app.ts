@@ -5,14 +5,12 @@ import * as Router from 'koa-router';
 import * as bodyParser from 'koa-bodyparser';
 import * as serve from 'koa-static';
 import * as cors from 'koa2-cors';
-import {STATIC_ROOT, SESSION_KEYS, UPLOAD_MAX_SIZE, UPLOAD_MAX_FILES} from './util/config';
+import { STATIC_ROOT, SESSION_KEYS, SESSION_TIMEOUT, UPLOAD_MAX_SIZE, UPLOAD_MAX_FILES, DEV_MODE } from './util/config';
 import { Strategy as LocalStrategy } from 'passport-local'
 import { IWError } from './util/IWError';
 import { hash, verify } from './auth/digest';
-import User, {setUserRole, getUserData} from './models/user';
-import {deployContract} from './eth/contracts';
+import User, { setUserRole, getUserData } from './models/user';
 import admin from './admin';
-import { apolloUploadKoa } from 'apollo-upload-server'
 import { generateConfirmationUrl, generateEmailBody, sendMail } from './confirmEmail';
 import { decrypt } from './confirmEmail/helpers';
 import { updateConfirmationStatus } from './confirmEmail/confirmation';
@@ -23,7 +21,6 @@ const router = new Router();
 
 app.use(serve(STATIC_ROOT));
 app.use(bodyParser());
-app.use(apolloUploadKoa({ maxFileSize: UPLOAD_MAX_SIZE, maxFiles: UPLOAD_MAX_FILES }))
 
 // cors
 app.use(cors({
@@ -38,7 +35,7 @@ app.use(cors({
 app.keys = [SESSION_KEYS];
 const CONFIG = {
     key: 'sess:key',  /** (string) cookie key */
-    maxAge: 86400000, /** (number) maxAge in ms (default is 1 days) */
+    maxAge: SESSION_TIMEOUT, /** (number) maxAge in ms (default is 1 days) */
     overwrite: true,  /** (boolean) can overwrite or not (default true) */
     httpOnly: true,   /** (boolean) httpOnly or not (default true) */
     signed: true,     /** (boolean) signed or not (default true) */
@@ -50,11 +47,19 @@ app.use(session(CONFIG, app));
 app.use(passport.initialize());
 app.use(passport.session());
 
-/* app.use(async (ctx, next) => {
-    console.log('session')
-    console.log(ctx.session)
+// app.use(async (ctx, next) => {
+//     console.log('session')
+//     console.log(ctx.session)
+//     await next();
+// });
+
+// Allow only authenticated users perform requests for graphql
+app.use(async (ctx, next) => {
+    if (!DEV_MODE && ctx.path === '/graphql' && ctx.isUnauthenticated()) {
+        ctx.throw(401, 'Unauthorized access');
+    }
     await next();
-}) */
+});
 
 // Passport setup.
 passport.serializeUser((user: any, done) => {
@@ -127,12 +132,12 @@ router.post('/signup', async (ctx, next) => {
 
             // sending confirmation email
             const confirmEmailUrl = generateConfirmationUrl(user._id.toString());
-            console.log('confirmEmailUrl', confirmEmailUrl)
+            // console.log('confirmEmailUrl', confirmEmailUrl)
             const emailBody = generateEmailBody(confirmEmailUrl);
-            console.log('emailBody', emailBody)
+            // console.log('emailBody', emailBody)
             const result = await sendMail(user.email, emailBody);
-            console.log('result')
-            console.log(result)
+            // console.log('result')
+            // console.log(result)
             updateConfirmationStatus(user._id, 'sendedConfirmation');
         }
     })(ctx, next);
@@ -160,27 +165,13 @@ router.get('/logout', async (ctx) => {
     ctx.body = 'logout';
 });
 
-// Contract deploy request handler.
-router.post('/deploy', async (ctx: Koa.Context) => {
-    try {
-        if(ctx.session == undefined || null)
-            throw new IWError(401, "Access denied");
-        const { name, args } = ctx.request.body as any;
-        const data = await deployContract(name, args);
-        ctx.body = { data };
-    } catch(err) {
-        // should be IWError type error.
-        ctx.throw(err.status, err.message);
-    }
-});
-
 router.get('/confirmEmail/:hash', (ctx) => {
     const { params: { hash } } = ctx;
-    console.log('hash', hash);
+    // console.log('hash', hash);
     const SECRET = 'secret' // process.env.EMAIL_SECRET;
-    console.log('SECRET', SECRET)
+    // console.log('SECRET', SECRET)
     const userId = decrypt(SECRET, hash);
-    console.log('userId', userId);
+    // console.log('userId', userId);
     updateConfirmationStatus(userId, 'confirmed');
     ctx.body = 'Your email has been confirmed!';
 });

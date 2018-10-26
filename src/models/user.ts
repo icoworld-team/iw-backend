@@ -20,11 +20,7 @@ const schema = new Schema({
     email: {
         type: String,
         required: true,
-        // unique: true
-        /* index: {
-            unique: true,
-            sparse: true
-        } */
+        unique: true
     },
     role: {
         type: String,
@@ -70,6 +66,10 @@ const schema = new Schema({
             type: String,
             default: ""
         }
+    },
+    pined_post: {
+        type: ObjectId,
+        ref: 'Post'
     },
     posts: [{
         type: ObjectId,
@@ -181,6 +181,7 @@ export function getUserData(user) {
         commenters: user.commenters,
         twoFactorAuth: user.twoFactorAuth,
         notifications: user.notifications,
+        pined_post: user.pined_post,
         top: user.top,
         verified: user.verified,
         about: user.about,

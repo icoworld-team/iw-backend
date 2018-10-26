@@ -30,7 +30,7 @@ services:
         ipv4_address: 172.30.0.111
     ports:
       - "27017:27017"
-    command: mongod
+    command: mongod --bind_ip 0.0.0.0
   
   app:
       build:
@@ -47,8 +47,11 @@ services:
           EMAIL_SECRET: "secret"
           SENDER_EMAIL_ADDRESS: "icoworldcloud@gmail.com"
           SENDER_EMAIL_PASS: "123456@@"
+          NODE_ENV: "development"
       image: ico/backend:$BUILD_ID
       container_name: backend-$BUILD_ID
+      volumes:
+        - "/var/static/images:/app/static/images/:rw"
       ports:
         - "3000:3000"
       networks:

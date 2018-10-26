@@ -3,10 +3,22 @@ import { ApolloServer } from 'apollo-server-koa';
 import io from './socket'
 import schema from './schema';
 import database, {close} from './db';
+import { GuestUser } from './auth/permissions';
+
+const path = '/graphql';
 
 // Create the server
-const server = new ApolloServer(schema);
-server.applyMiddleware({ app });
+const server = new ApolloServer({
+  ...schema,
+  context: (req) => {
+    return {
+      user: (req.ctx.state.user) 
+              ? req.ctx.state.user
+              : GuestUser
+    }
+  }
+});
+server.applyMiddleware({ app, path });
 
 // Attach the socket to the application
 io.attach(app);
@@ -18,10 +30,9 @@ function cleanup(code:number) {
     return;
   }
   close();
-  console.log('Process will exit in 5 seconds');
-  exitTimeout = setTimeout(process.exit, 5000);
   server.stop();
-  process.exit(code);
+  console.log('Process will exit in 5 seconds');
+  exitTimeout = setTimeout(process.exit, 5000, code);
 }
 // Setup handlers for various termination signals.
 process.on('SIGTERM', () => {

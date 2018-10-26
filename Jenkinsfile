@@ -29,8 +29,8 @@ pipeline {
     stage('Testing image ico/backend:${BUILD_ID}') {
       steps {
         sh('''#!/bin/bash
-          docker run --name backend-test-$BUILD_ID -d -p 5555:3000 ico/backend:$BUILD_ID && \\
-          sleep 10 && \\
+          docker run --name backend-test-$BUILD_ID -d -p 5555:3000 --network=efk_fluentd --env-file /var/icoworld/test.env ico/backend:$BUILD_ID && \\
+          sleep 30 && \\
           RESPONSE=`curl localhost:5555` || exit 2
           if [ \$RESPONSE != 'icoWorld' ]; then
             echo "stopping container - ${BUILD_ID}"
