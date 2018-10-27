@@ -53,7 +53,7 @@ const Mutation = gql(`
         editPost(input: PostEditInput!): PostEditResponse!
         deletePost(id: ID!): Boolean!
         likePost(id: ID!, like: Boolean!): Int!
-        pinPost(id:ID!): ID!
+        pinPost(id: ID!, pin: Boolean!): ID!
         rePost(postId: ID!): Int!
         likeRePost(id: ID!, like: Boolean!): Int!
         deleteRePost(id: ID!): Boolean!
@@ -335,6 +335,7 @@ const Types = gql(`
     type ChatUserData {
         id: ID!
         name: String!
+        avatar: ID
     }
 
     type Message {
@@ -353,7 +354,6 @@ const Types = gql(`
 
     type ChatResponse {
         chatId: ID!
-        countUnreadMessages: Int!
         parnter: ChatUserData!
         messages: [Message!]!
     }

@@ -128,13 +128,6 @@ const MutationImpl = {
   updateUser: async (_, { input }, ctx) => {
     checkEditPermission(_Profile, ctx.user.role);
     const id = ctx.user._id.toString();
-    const login = input['login'];
-    if (login) {
-      const user = await User.findOne({ login });
-      if (user && user._id.toString() !== id) {
-        throw new Error(`User with the same login already exists: ${login}`);
-      }
-    }
     const phone = input['phone'];
     if (phone) {
       const user = await User.findOne({ phone });
@@ -224,10 +217,12 @@ const MutationImpl = {
     return updatedPost.likes.length;
   },
 
-  pinPost: async (_, {id}, ctx) => {
+  pinPost: async (_, {id, pin}, ctx) => {
     checkEditPermission(_Profile, ctx.user.role);
-    await User.findByIdAndUpdate(ctx.user._id, {$set:{ pined_post: id }});
-    return id;
+    const update = (pin) 
+            ? await User.findByIdAndUpdate(ctx.user._id, {$set:{ pined_post: id }})
+            : await User.findByIdAndUpdate(ctx.user._id, {$unset:{ pined_post: "" }});
+    return update._id;
   },
 
   rePost: async (_, { postId }, ctx) => {
