@@ -78,7 +78,7 @@ io.on('newMessage', async (ctx, data) => {
     console.log('text:', text);
     console.log('partnerId:', partnerId);
 
-    const author = await User.findById(authorId).select('name') as any;
+    const author = await User.findById(authorId).select('name avatar') as any;
 
     const messageData = {
       userId: authorId,
@@ -107,7 +107,7 @@ io.on('newMessage', async (ctx, data) => {
       const chatData = await Chat.findById(chat._id)
         .populate({
           path: 'members',
-          select: 'name'
+          select: 'name avatar'
         })
 
       newChatResponseToAuthor = formatChatData(chatData, authorId);
@@ -117,15 +117,16 @@ io.on('newMessage', async (ctx, data) => {
         id: message._id,
         author: {
           id: authorId,
-          name: author.name
+          name: author.name,
+          avatar: author.avatar
         },
         content: message.content,
         read: message.read,
         date: message.date
       };
       
-      newChatResponseToAuthor.lastMessage = lastMessage;
-      newChatResponseToPartner.lastMessage = lastMessage;
+      newChatResponseToAuthor.messages = [lastMessage];
+      newChatResponseToPartner.messages = [lastMessage];
     }
 
     const newMessageResponse = {
@@ -134,7 +135,8 @@ io.on('newMessage', async (ctx, data) => {
       read: message.read,
       author: {
         id: authorId,
-        name: author.name
+        name: author.name,
+        avatar: author.avatar
       },
       content: message.content,
       date: message.date
