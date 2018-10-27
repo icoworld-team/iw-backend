@@ -193,14 +193,14 @@ const QueryImpl = {
     const chats = await Chat.find().where('_id').in(user.chats)
       .populate({
         path: 'members',
-        select: 'name'
+        select: 'name avatar'
       })
       .populate({
         path: 'messages',
         select: 'userId content read date',
         populate: {
           path: 'userId',
-          select: 'name'
+          select: 'name avatar'
         } 
       }) as any;
 

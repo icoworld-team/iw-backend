@@ -30,7 +30,8 @@ export function formatMessageData(message) {
         id: _id,
         author: {
             id: user._id,
-            name: user.name
+            name: user.name,
+            avatar: user.avatar
         },
         content,
         read,

@@ -31,7 +31,8 @@ export function formatChatData(chat, userId) {
         countUnreadMessages: chat.countUnreadMessages,
         parnter: {
             id: parnter._id,
-            name: parnter.name
+            name: parnter.name,
+            avatar: parnter.avatar
         },
     }
 }

@@ -335,6 +335,7 @@ const Types = gql(`
     type ChatUserData {
         id: ID!
         name: String!
+        avatar: ID
     }
 
     type Message {
