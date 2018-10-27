@@ -107,7 +107,7 @@ io.on('newMessage', async (ctx, data) => {
       const chatData = await Chat.findById(chat._id)
         .populate({
           path: 'members',
-          select: 'name'
+          select: 'name avatar'
         })
 
       newChatResponseToAuthor = formatChatData(chatData, authorId);
