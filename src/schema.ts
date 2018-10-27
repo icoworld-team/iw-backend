@@ -354,7 +354,6 @@ const Types = gql(`
 
     type ChatResponse {
         chatId: ID!
-        countUnreadMessages: Int!
         parnter: ChatUserData!
         messages: [Message!]!
     }

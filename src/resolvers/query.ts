@@ -208,21 +208,17 @@ const QueryImpl = {
       .map(chat => {
         const { _id, members, messages } = chat;
         let resultMessages;
-        let countUnreadMessages;
         const sortedMessages = [...messages].sort((a, b) => b.date - a.date);
         let unreadMessages = sortedMessages.filter(message => !message.read);
         if (unreadMessages.length !== 0) {
           resultMessages = unreadMessages;
-          countUnreadMessages = unreadMessages.length;
         } else {
           resultMessages = [sortedMessages[0]];
-          countUnreadMessages = 0;
         }
         return {
           _id,
           members,
-          messages: resultMessages,
-          countUnreadMessages
+          messages: resultMessages
         }
       })
       .map(chat => formatChatDataWithUnreadMessages(chat, userId));
