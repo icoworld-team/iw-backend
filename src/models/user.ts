@@ -2,6 +2,7 @@ import mongoose = require('mongoose');
 import Wallet from './Wallet';
 import Expirience from './Expirience';
 import {Roles, getPermission} from '../auth/permissions';
+import {Status} from '../auth/emailConfirm';
 
 const Schema = mongoose.Schema;
 const ObjectId = Schema.Types.ObjectId;
@@ -130,8 +131,8 @@ const schema = new Schema({
     },
     confirmation: {
         type: String,
-        enum: ['notConfirmed', 'sendedConfirmation', 'confirmed'],
-        default: 'notConfirmed'
+        enum: [Status.NotConfirmed, Status.AwaitsConfirmation, Status.Confirmed],
+        default: Status.NotConfirmed
     }
 }, { timestamps: true });
 
