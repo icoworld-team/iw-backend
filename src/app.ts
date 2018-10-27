@@ -81,11 +81,10 @@ passport.use('local-signup', new LocalStrategy({
     passReqToCallback: true,
 },
     async function (ctx, email, password, done) {
-        const { firstName, lastName, login } = ctx.body;
+        const { firstName, lastName } = ctx.body;
         try {
             const userData = {
                 name: `${firstName} ${lastName}`,
-                login,
                 email,
                 pwd: await hash(password)
             };

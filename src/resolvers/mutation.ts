@@ -128,6 +128,13 @@ const MutationImpl = {
   updateUser: async (_, { input }, ctx) => {
     checkEditPermission(_Profile, ctx.user.role);
     const id = ctx.user._id.toString();
+    const login = input['login'];
+    if (login) {
+      const user = await User.findOne({ login });
+      if (user && user._id.toString() !== id) {
+        throw new Error(`User with the same login already exists: ${login}`);
+      }
+    }
     const phone = input['phone'];
     if (phone) {
       const user = await User.findOne({ phone });

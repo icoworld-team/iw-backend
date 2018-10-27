@@ -12,11 +12,7 @@ const schema = new Schema({
         type: String,
         required: true
     },
-    login: {
-        type: String,
-        required: true,
-        unique: true
-    },
+    login: String,
     pwd: {
         type: Buffer,  
         required: true
