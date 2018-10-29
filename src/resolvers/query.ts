@@ -245,7 +245,7 @@ const QueryImpl = {
     const messages = await Message.find().where('_id').in(chat.messages)
       .populate({
         path: 'userId',
-        select: 'name'
+        select: 'name avatar'
       })
       .sort({ date: -1 })
       .skip(skip)
