@@ -17,6 +17,7 @@ const Query = gql(`
         searchPost(searchText: String!): [Post!]!
         searchPostInProfile(userId: ID!, searchText: String!): SearchPostInProfileResponse!
         getReposts(userId: ID!): [Post]!
+        searchInFollowsPosts(userId: ID!, txt: String!): [Post]!
         getFollowsPosts(userId: ID!): [Post]!
         getComments(postId: ID!): [Comment]!
         getInvestors(input: InvestorsFilterParamsInput!): [Investor!]!

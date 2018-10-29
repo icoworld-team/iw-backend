@@ -112,6 +112,17 @@ const QueryImpl = {
     return posts.map(post => getRepostData(post, repsMap.get(post._id.toString())));
   },
 
+  searchInFollowsPosts: async (_, { userId, txt }, ctx) => {
+    checkReadPermission(_Posts, ctx.user.role);
+    const user = await User.findById(userId).select('follows') as any;
+    const posts = await Post.find({ content: new RegExp(`.*${txt}.*`, 'i') }).where('userId').in(user.follows)
+    .populate({
+      path: 'userId',
+      select: 'name login avatar'
+    });
+    return posts.map(post => getPostData(post));
+  },
+
   getFollowsPosts: async (_, { userId }, ctx) => {
     checkReadPermission(_Posts, ctx.user.role);
     const user = await User.findById(userId).select('follows') as any;
