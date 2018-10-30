@@ -12,6 +12,8 @@ import Message, { formatMessageData } from "../models/Message";
 import RePost from "../models/RePost";
 import News, { getNewsData } from "../models/News";
 import { sortByValuesDesc } from "../util/common";
+import { sendTextEMail } from '../util/email';
+import {ADMIN_EMAIL} from '../util/config';
 
 // Query methods implementation.
 const QueryImpl = {
@@ -110,6 +112,17 @@ const QueryImpl = {
         select: 'name login avatar'
       });
     return posts.map(post => getRepostData(post, repsMap.get(post._id.toString())));
+  },
+
+  searchInFollowsPosts: async (_, { userId, txt }, ctx) => {
+    checkReadPermission(_Posts, ctx.user.role);
+    const user = await User.findById(userId).select('follows') as any;
+    const posts = await Post.find({ content: new RegExp(`.*${txt}.*`, 'i') }).where('userId').in(user.follows)
+    .populate({
+      path: 'userId',
+      select: 'name login avatar'
+    });
+    return posts.map(post => getPostData(post));
   },
 
   getFollowsPosts: async (_, { userId }, ctx) => {
@@ -234,7 +247,7 @@ const QueryImpl = {
     const messages = await Message.find().where('_id').in(chat.messages)
       .populate({
         path: 'userId',
-        select: 'name'
+        select: 'name avatar'
       })
       .sort({ date: -1 })
       .skip(skip)
@@ -277,7 +290,28 @@ const QueryImpl = {
     });
     const sres = new Map([...res].sort(sortByValuesDesc));
     return sres.keys();
-  },  
+  },
+
+  complainUser: async (_, {userId, content}, ctx) => {
+    checkReadPermission(_Profile, ctx.user.role);
+    const user = await User.findById(userId).select('name login') as any;
+    const title = `Complains to: ${user.name}, ${user.login}, ${userId}`;
+    const result = await sendTextEMail(ADMIN_EMAIL, title, content);
+    return result;
+  },
+
+  complainPost: async (_, {postId, content}, ctx) => {
+    checkReadPermission(_Posts, ctx.user.role);
+    const post = await Post
+      .findById(postId)
+      .populate({
+        path: 'userId',
+        select: 'name login'
+      }) as any;
+    const title = `Complains to: ${post.userId.name}, ${post.userId.login}, ${post.userId._id.toString()}`;
+    const result = await sendTextEMail(ADMIN_EMAIL, title, content);
+    return result;
+  },
 }
 
 function getRepostsMap(reposts:Array<any>):Map<string,any> {

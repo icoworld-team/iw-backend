@@ -11,9 +11,7 @@ import { IWError } from './util/IWError';
 import { hash, verify } from './auth/digest';
 import User, { setUserRole, getUserData } from './models/user';
 import admin from './admin';
-import { generateConfirmationUrl, generateEmailBody, sendMail } from './confirmEmail';
-import { decrypt } from './confirmEmail/helpers';
-import { updateConfirmationStatus } from './confirmEmail/confirmation';
+import { setConfirmed, setAwaitsConfirmation, sendMail, decrypt } from './auth/emailConfirm';
 
 // Initialize of Koa application.
 const app = new Koa();
@@ -81,11 +79,10 @@ passport.use('local-signup', new LocalStrategy({
     passReqToCallback: true,
 },
     async function (ctx, email, password, done) {
-        const { firstName, lastName, login } = ctx.body;
+        const { firstName, lastName } = ctx.body;
         try {
             const userData = {
                 name: `${firstName} ${lastName}`,
-                login,
                 email,
                 pwd: await hash(password)
             };
@@ -131,15 +128,15 @@ router.post('/signup', async (ctx, next) => {
             setUserRole(user);
             ctx.body = getUserData(user);
 
-            // sending confirmation email
-            const confirmEmailUrl = generateConfirmationUrl(user._id.toString());
-            // console.log('confirmEmailUrl', confirmEmailUrl)
-            const emailBody = generateEmailBody(confirmEmailUrl);
-            // console.log('emailBody', emailBody)
-            const result = await sendMail(user.email, emailBody);
-            // console.log('result')
-            // console.log(result)
-            updateConfirmationStatus(user._id, 'sendedConfirmation');
+            // Request email confirmation
+            try {
+                const result = await sendMail(user);
+                console.log(`Sent email confirmation request: ${result}`);
+                setAwaitsConfirmation(user._id);
+            } catch(err) {
+                console.log(`Error sending confirmation email to: ${user.email}`);
+                console.log(`Details: ${err}`);
+            }
         }
     })(ctx, next);
 });
@@ -166,15 +163,18 @@ router.get('/logout', async (ctx) => {
     ctx.body = 'logout';
 });
 
-router.get('/confirmEmail/:hash', (ctx) => {
+router.get('/confirmEmail/:hash', async (ctx) => {
     const { params: { hash } } = ctx;
-    // console.log('hash', hash);
-    const SECRET = 'secret' // process.env.EMAIL_SECRET;
-    // console.log('SECRET', SECRET)
-    const userId = decrypt(SECRET, hash);
-    // console.log('userId', userId);
-    updateConfirmationStatus(userId, 'confirmed');
-    ctx.body = 'Your email has been confirmed!';
+    const userId = decrypt(hash);
+    const user = await User.findById(userId);
+    if(!user) {
+        console.log(`Cannot find an user with id: ${userId}`);
+        ctx.status = 410;
+        ctx.body = 'User is cannot be found!';
+    } else {
+        setConfirmed(userId);
+        ctx.body = 'Your email has been confirmed!';
+    }
 });
 
 

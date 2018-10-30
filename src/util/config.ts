@@ -18,3 +18,5 @@ export const SESSION_TIMEOUT = parseInt(process.env.SESSION_TIMEOUT) || 1800000;
 export const UPLOAD_MAX_SIZE = parseInt(process.env.UPLOAD_MAX_SIZE || '2500000');
 // Max files to upload
 export const UPLOAD_MAX_FILES = parseInt(process.env.UPLOAD_MAX_FILES || '10');
+// Administrator email address.
+export const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'address@mail.org';
