@@ -68,6 +68,7 @@ io.on('newMessage', async (ctx, data) => {
   console.log('event newMessage');
   try {
     if (!ctx.state.isAuth) {
+      ctx.socket.emit('notAuthenticated');
       throw new Error('User is not authenticated');
     }
 
