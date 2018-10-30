@@ -16,6 +16,10 @@ function getSession(cookies, cookieKey) {
   const sessionCookie = parsedCookies[cookieKey];
   if (sessionCookie) {
     const decodedCookie = decodeCookie(sessionCookie);
+    const date = Number(new Date());
+    if (date >= decodedCookie._expire) {
+      return false;
+    }
     if (decodedCookie.passport && decodedCookie.passport.user && Object.keys(decodedCookie.passport.user).length !== 0) {
       return decodedCookie.passport.user;
     }
