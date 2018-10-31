@@ -52,13 +52,13 @@ app.use(passport.session());
 // });
 
 // Allow only authenticated users perform requests for graphql
-app.use(async (ctx, next) => {
+/* app.use(async (ctx, next) => {
     if (!DEV_MODE && ctx.path === '/graphql' && (ctx as any).isUnauthenticated()) {
         console.log('Unauthorized access')
         ctx.throw(401, 'Unauthorized access');
     }
     await next();
-});
+}); */
 
 // Passport setup.
 passport.serializeUser((user: any, done) => {
