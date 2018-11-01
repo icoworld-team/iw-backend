@@ -5,9 +5,16 @@ import { ApolloError } from 'apollo-server-koa';
 
 // No permissions message.
 const NO_PERMISSIONS = 'You has NOT enough permissions to complete the request!';
+const NO_AUTH = 'You must be logged in to invoke this method!';
 
 class PermissionsError extends ApolloError {
     constructor(msg = NO_PERMISSIONS, code = '405') {
+        super(msg, code);
+    }
+}
+
+class AuthError extends ApolloError {
+    constructor(msg = NO_AUTH, code = '401') {
         super(msg, code);
     }
 }
@@ -46,10 +53,10 @@ const Schema = {
     },
     'User': {
         'Registration': Permissions.R | Permissions.E,
-        'Profile': Permissions.R | Permissions.E,
-        'Posts': Permissions.R | Permissions.W | Permissions.E,
+        'Profile': Permissions.R | Permissions.E | Permissions.D,
+        'Posts': Permissions.R | Permissions.W | Permissions.E | Permissions.D,
         'News': Permissions.R,
-        'Comments': Permissions.R | Permissions.W | Permissions.E,
+        'Comments': Permissions.R | Permissions.W | Permissions.E | Permissions.D,
         'Chats': Permissions.R | Permissions.W,
         'Pools': Permissions.R | Permissions.W,
         'Contracts': Permissions.R | Permissions.W,
@@ -75,8 +82,10 @@ export const Roles = {
     Admin: _array[2]
 }
 
-export const GuestUser = {
-    role: Roles.Guest
+export function getRole(ctx) {
+    if(!ctx.user)
+        throw new AuthError();
+    return ctx.user.role;   
 }
 
 function hasRole(role) {
