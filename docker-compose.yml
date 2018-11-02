@@ -1,14 +1,22 @@
 version: '2' 
+
 networks:
-  efk_fluentd:
-    external: true
+  hostnet:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.18.0.0/24
+
 services:
   
-  #  proxy:
-  #    build: ./nginx
-  #    ports:
-  #      - "3000:3000"
-  #    container_name: balancer
+  proxy:
+    build: ./nginx
+    networks:
+      hostnet:
+        ipv4_address: 172.18.0.100
+    ports:
+      - "80:80"
+    container_name: proxy
 
   db:
     image: mongo
@@ -20,44 +28,36 @@ services:
       - "/var/icoworld/mongo.env/"
     restart: on-failure
     container_name: database
-    logging:
-      driver: "fluentd"
-      options:
-        fluentd-address: 172.30.0.10:24224
-        tag: mongo.log
+    #logging:
+    #  driver: "fluentd"
+    #  options:
+    #    fluentd-address: 172.30.0.10:24224
+    #    tag: mongo.log
+    #networks:
+    #  efk_fluentd:
+    #    ipv4_address: 172.30.0.111
     networks:
-      efk_fluentd:
-        ipv4_address: 172.30.0.111
+      - hostnet
     ports:
       - "27017:27017"
     command: mongod --bind_ip 0.0.0.0
   
   app:
-      build:
-        context: .
-        args:
-          NODE_URL: http://icoworld.projects.oktend.com:8545
-          ETH_NODE_URL: http://icoworld.projects.oktend.com:8545
-          ETH_PRIVATE_KEY: ""
-          ETH_FROM_ACCOUNT: "0x007ccffb7916f37f7aeef05e8096ecfbe55afc2f"
-          ETH_DEPLOY_PRICE: "100000"
-          PORT: 3000
-          DB_URI: mongodb://icodb:ghwzbH99WAR3@172.30.0.111:27017/ico_world_db
-          BASE_URL: "http://icoworld.projects.oktend.com:3030"
-          EMAIL_SECRET: "secret"
-          SENDER_EMAIL_ADDRESS: "icoworldcloud@gmail.com"
-          SENDER_EMAIL_PASS: "123456@@"
-          NODE_ENV: "development"
-      image: ico/backend:$BUILD_ID
-      container_name: backend-$BUILD_ID
+      build: .
+      env_file:
+        - "/var/icoworld/app.env"
+      image: ico/backend:staging
+      container_name: backend
       volumes:
         - "/var/static/images:/app/static/images/:rw"
       ports:
         - "3000:3000"
       networks:
-        - efk_fluentd 
-      logging:
-        driver: "fluentd"
-        options:
-          fluentd-address: 172.30.0.10:24224
-          tag: backend.log
+        - hostnet
+      #networks:
+      #  - efk_fluentd 
+      #logging:
+      #  driver: "fluentd"
+      #  options:
+      #    fluentd-address: 172.30.0.10:24224
+      #    tag: backend.log
