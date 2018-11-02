@@ -27,6 +27,9 @@ const Query = gql(`
         searchChat(userId: ID!, searchText: String!): [Chat!]!
         getNews: [News!]!
         getPopularTags(from: String!, to: String!): [String]
+        complainUser(userId: ID!, content: String!): String!
+        complainPost(postId: ID!, content: String!): String!
+        sendEmail(addr: String!, title: String!, content: String!): String
     }
 `);
 
