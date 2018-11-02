@@ -12,6 +12,7 @@ import { hash, verify } from './auth/digest';
 import User, { setUserRole, getUserData } from './models/user';
 import admin from './admin';
 import { setConfirmed, setAwaitsConfirmation, sendMail, decrypt } from './auth/emailConfirm';
+import { sendTextEMail } from './util/email';
 
 // Initialize of Koa application.
 const app = new Koa();
@@ -179,6 +180,11 @@ router.get('/confirmEmail/:hash', async (ctx) => {
     }
 });
 
+router.post('/sendEmail', async (ctx, next) => {
+    const { addr, title, content } = ctx.request.body as any;
+    const result = await sendTextEMail(addr, title, content);
+    ctx.body = result;
+});
 
 router.get('/', async (ctx: Koa.Context) => {
     ctx.body = 'icoWorld'
