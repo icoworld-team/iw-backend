@@ -9,15 +9,6 @@ networks:
 
 services:
   
-  proxy:
-    build: ./nginx
-    networks:
-      hostnet:
-        ipv4_address: 172.18.0.100
-    ports:
-      - "80:80"
-    container_name: proxy
-
   db:
     image: mongo
     volumes:
@@ -37,10 +28,9 @@ services:
     #  efk_fluentd:
     #    ipv4_address: 172.30.0.111
     networks:
-      - hostnet
-    ports:
-      - "27017:27017"
-    command: mongod --bind_ip 0.0.0.0
+      hostnet:
+        ipv4_address: 172.18.0.112
+    #command: mongod --bind_ip 0.0.0.0
   
   app:
       build: .
@@ -50,8 +40,6 @@ services:
       container_name: backend
       volumes:
         - "/var/static/images:/app/static/images/:rw"
-      ports:
-        - "3000:3000"
       networks:
         - hostnet
       #networks:
