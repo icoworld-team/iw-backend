@@ -1,7 +1,7 @@
 version: '2' 
-#networks:
-#  efk_fluentd:
-#    external: true
+networks:
+  efk_fluentd:
+    external: true
 services:
   
   #  proxy:
@@ -20,14 +20,14 @@ services:
       - "/var/icoworld/mongo.env/"
     restart: on-failure
     container_name: database
-   # logging:
-   #   driver: "fluentd"
-   #   options:
-   #     fluentd-address: 172.30.0.10:24224
-   #     tag: mongo.log
-   # networks:
-   #   efk_fluentd:
-   #     ipv4_address: 172.30.0.111
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: 172.30.0.10:24224
+        tag: mongo.log
+    networks:
+      efk_fluentd:
+        ipv4_address: 172.30.0.111
     ports:
       - "27017:27017"
     command: mongod --bind_ip 0.0.0.0
@@ -54,10 +54,10 @@ services:
         - "/var/static/images:/app/static/images/:rw"
       ports:
         - "3000:3000"
-   #   networks:
-   #     - efk_fluentd 
-   #   logging:
-   #     driver: "fluentd"
-   #     options:
-   #       fluentd-address: 172.30.0.10:24224
-   #       tag: backend.log
+      networks:
+        - efk_fluentd 
+      logging:
+        driver: "fluentd"
+        options:
+          fluentd-address: 172.30.0.10:24224
+          tag: backend.log
