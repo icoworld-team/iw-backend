@@ -1,4 +1,4 @@
-import {_Profile, _Pools, _Posts, _Comments, _Chats, _Contracts, _News, checkReadPermission} from '../auth/permissions';
+import {_Profile, _Pools, _Posts, _Comments, _Chats, _Contracts, _News, checkReadPermission, getRole} from '../auth/permissions';
 import User, { getUserData, getShortUserData } from "../models/user";
 import Pool from "../models/Pool";
 import { getPoolData, getPoolDataForSearchResult } from '../models/Pool';
@@ -18,13 +18,13 @@ import {ADMIN_EMAIL} from '../util/config';
 // Query methods implementation.
 const QueryImpl = {
   getUser: async (_, { userId }, ctx) => {
-    checkReadPermission(_Profile, ctx.user.role);
+    checkReadPermission(_Profile, getRole(ctx));
     const user = await User.findById(userId);
     return getUserData(user);
   },
 
   getPool: async (_, { poolId }, ctx) => {
-    checkReadPermission(_Pools, ctx.user.role);
+    checkReadPermission(_Pools, getRole(ctx));
     const pool = await Pool
       .findById(poolId)
       .populate({
@@ -35,7 +35,7 @@ const QueryImpl = {
   },
 
   searchPool: async (_, { poolName }, ctx) => {
-    checkReadPermission(_Pools, ctx.user.role);
+    checkReadPermission(_Pools, getRole(ctx));
     const pools = await Pool
       .find({ poolName: new RegExp(`.*${poolName}.*`, 'i') })
       .populate({
@@ -46,14 +46,14 @@ const QueryImpl = {
   },
 
   getPools: async (_, { userId }, ctx) => {
-    checkReadPermission(_Pools, ctx.user.role);
+    checkReadPermission(_Pools, getRole(ctx));
     const user = await User.findById(userId).select('pools') as any;
     const pools = await Pool.find().where('_id').in(user.pools);
     return pools.map((pool => getPoolData(pool)));
   },
 
   getPost: async (_, { postId }, ctx) => {
-    checkReadPermission(_Posts, ctx.user.role);
+    checkReadPermission(_Posts, getRole(ctx));
     const post = await Post
       .findById(postId)
       .populate({
@@ -64,7 +64,7 @@ const QueryImpl = {
   },
 
   searchPost: async (_, { searchText }, ctx) => {
-    checkReadPermission(_Posts, ctx.user.role);
+    checkReadPermission(_Posts, getRole(ctx));
     const posts = await Post
       .find({ content: new RegExp(`.*${searchText}.*`, 'i') })
       .populate({
@@ -75,7 +75,7 @@ const QueryImpl = {
   },
 
   searchPostInProfile: async (_, { userId, searchText }, ctx) => {
-    checkReadPermission(_Posts, ctx.user.role);
+    checkReadPermission(_Posts, getRole(ctx));
     const user = await User.findById(userId).select('posts reposts') as any;
     const posts = await Post.find({ content: new RegExp(`.*${searchText}.*`, 'i') }).where('_id').in(user.posts)
       .populate({
@@ -101,7 +101,7 @@ const QueryImpl = {
   },
 
   getReposts: async (_, { userId }, ctx) => {
-    checkReadPermission(_Posts, ctx.user.role);
+    checkReadPermission(_Posts, getRole(ctx));
     const user = await User.findById(userId).select('reposts') as any;
     const reposts = await RePost.find().where('_id').in(user.reposts).select('_id postId date likes') as any;
     const repsMap:Map<string, any> = getRepostsMap(reposts);
@@ -115,7 +115,7 @@ const QueryImpl = {
   },
 
   searchInFollowsPosts: async (_, { userId, txt }, ctx) => {
-    checkReadPermission(_Posts, ctx.user.role);
+    checkReadPermission(_Posts, getRole(ctx));
     const user = await User.findById(userId).select('follows') as any;
     const posts = await Post.find({ content: new RegExp(`.*${txt}.*`, 'i') }).where('userId').in(user.follows)
     .populate({
@@ -126,7 +126,7 @@ const QueryImpl = {
   },
 
   getFollowsPosts: async (_, { userId }, ctx) => {
-    checkReadPermission(_Posts, ctx.user.role);
+    checkReadPermission(_Posts, getRole(ctx));
     const user = await User.findById(userId).select('follows') as any;
     const posts = await Post.find().where('userId').in(user.follows)
     .populate({
@@ -137,7 +137,7 @@ const QueryImpl = {
   },
 
   getComments: async (_, { postId }, ctx) => {
-    checkReadPermission(_Comments, ctx.user.role);
+    checkReadPermission(_Comments, getRole(ctx));
     const post = await Post.findById(postId) as any;
     const comments = await Comment.find().where('_id').in(post.comments)
     .populate({
@@ -148,7 +148,7 @@ const QueryImpl = {
   },
 
   getInvestors: async (_, { input }, ctx) => {
-    checkReadPermission(_Profile, ctx.user.role);
+    checkReadPermission(_Profile, getRole(ctx));
     const { sortBy, ...filterParams } = input;
     const params = investors.generateSearchingParams(filterParams);
     const users = await User
@@ -159,7 +159,7 @@ const QueryImpl = {
   },
 
   getFollows: async (_, { userId }, ctx) => {
-    checkReadPermission(_Profile, ctx.user.role);
+    checkReadPermission(_Profile, getRole(ctx));
     const user = await User.findById(userId) as any;
     const users = await User.find().where('_id').in(user.follows)
       .select('name login avatar');
@@ -167,7 +167,7 @@ const QueryImpl = {
   },
 
   getSubscribers: async (_, { userId }, ctx) => {
-    checkReadPermission(_Profile, ctx.user.role);
+    checkReadPermission(_Profile, getRole(ctx));
     const user = await User.findById(userId) as any;
     const users = await User.find().where('_id').in(user.subscribers)
       .select('name login avatar');
@@ -175,19 +175,19 @@ const QueryImpl = {
   },
 
   getTopUsers: async (_, {flag}, ctx) => {
-    checkReadPermission(_Profile, ctx.user.role);
+    checkReadPermission(_Profile, getRole(ctx));
     const users = await User.find({top: flag});
     return users.map((usr => getShortUserData(usr)));
   },
 
   isTopUser: async (_, { userId }, ctx) => {
-    checkReadPermission(_Profile, ctx.user.role);
+    checkReadPermission(_Profile, getRole(ctx));
     const user = await User.findById(userId).select('top') as any;
     return user ? user.top : false;
   },
 
   getContracts: async (_, { input }, ctx) => {
-    checkReadPermission(_Contracts, ctx.user.role);
+    checkReadPermission(_Contracts, getRole(ctx));
     const { name, description, address } = input;
     const params = {} as any;
     if (name !== undefined) {
@@ -201,7 +201,7 @@ const QueryImpl = {
   },
 
   getChats: async (_, { userId }, ctx) => {
-    checkReadPermission(_Chats, ctx.user.role);
+    checkReadPermission(_Chats, getRole(ctx));
     const user = await User.findById(userId) as any;
     const chats = await Chat.find().where('_id').in(user.chats)
       .populate({
@@ -240,7 +240,7 @@ const QueryImpl = {
   },
 
   getChatMessages: async (_ , { input }, ctx) => {
-    checkReadPermission(_Chats, ctx.user.role);
+    checkReadPermission(_Chats, getRole(ctx));
     const { chatId, skip } = input;
     const limit = 20;
     const chat = await Chat.findById(chatId) as any;
@@ -263,7 +263,7 @@ const QueryImpl = {
   },
 
   searchChat: async (_, { userId, searchText }, ctx) => {
-    checkReadPermission(_Chats, ctx.user.role);
+    checkReadPermission(_Chats, getRole(ctx));
     const chats = await this.default.getChats(null, { userId });
     const filteredChats = chats.filter(chat => {
       const regexp = new RegExp(`.*${searchText}.*`, 'i');
@@ -273,13 +273,13 @@ const QueryImpl = {
   },
 
   getNews: async (_, {}, ctx) => {
-    checkReadPermission(_News, ctx.user.role);
+    checkReadPermission(_News, getRole(ctx));
     const news = await News.find();
     return news.map(newsItem => getNewsData(newsItem));
   },
 
   getPopularTags: async (_, { from, to }, ctx) => {
-    checkReadPermission(_News, ctx.user.role);
+    checkReadPermission(_News, getRole(ctx));
     const posts = await Post.find().where('createdAt').gte(from).lt(to).select('tags') as any;
     const res = new Map();
     posts.forEach(post => {
@@ -293,7 +293,7 @@ const QueryImpl = {
   },
 
   complainUser: async (_, {userId, content}, ctx) => {
-    checkReadPermission(_Profile, ctx.user.role);
+    checkReadPermission(_Profile, getRole(ctx));
     const user = await User.findById(userId).select('name login') as any;
     const title = `Complains to: ${user.name}, ${user.login}, ${userId}`;
     const result = await sendTextEMail(ADMIN_EMAIL, title, content);
@@ -301,7 +301,7 @@ const QueryImpl = {
   },
 
   complainPost: async (_, {postId, content}, ctx) => {
-    checkReadPermission(_Posts, ctx.user.role);
+    checkReadPermission(_Posts, getRole(ctx));
     const post = await Post
       .findById(postId)
       .populate({

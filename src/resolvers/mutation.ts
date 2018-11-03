@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import {STATIC_ROOT} from '../util/config';
-import {_Special, _Profile, _Pools, _Posts, _Comments, _Contracts, _News, checkCreatePermission, checkEditPermission, checkDeletePermission} from '../auth/permissions';
+import {_Special, _Profile, _Pools, _Posts, _Comments, _Contracts, _News, checkCreatePermission, checkEditPermission, checkDeletePermission, getRole} from '../auth/permissions';
 import User from "../models/user";
 import Pool, { generatePoolName } from "../models/Pool";
 import Post, { getPostData, getPostDataForEditResponse } from "../models/Post";
@@ -27,7 +27,7 @@ const MutationImpl = {
  */
 
   uploadFile: async (_, { file }, ctx) => {
-    checkCreatePermission(_Profile, ctx.user.role);
+    checkCreatePermission(_Profile, getRole(ctx));
     const { stream, filename, mimetype, encoding } = await file;
     const user = await User.findById(ctx.user);
     const folder = path.join(UPLOAD_PATH, user._id.toString());
@@ -45,7 +45,7 @@ const MutationImpl = {
   },
 
   addWallet: async (_, { addr}, ctx) => {
-    checkCreatePermission(_Profile, ctx.user.role);
+    checkCreatePermission(_Profile, getRole(ctx));
     const user = await User.findById(ctx.user._id).select('wallets') as any;
     const wallet = user.wallets.create({address: addr});
     user.wallets.push(wallet);
@@ -54,7 +54,7 @@ const MutationImpl = {
   },
 
   removeWallet: async (_, { id}, ctx) => {
-    checkDeletePermission(_Profile, ctx.user.role);
+    checkDeletePermission(_Profile, getRole(ctx));
     const user = await User.findById(ctx.user._id).select('wallets') as any;
     user.wallets.pull(id);
     user.save();
@@ -62,7 +62,7 @@ const MutationImpl = {
   },
 
   addEducation: async (_, { input }, ctx) => {
-    checkCreatePermission(_Profile, ctx.user.role);
+    checkCreatePermission(_Profile, getRole(ctx));
     const user = await User.findById(ctx.user._id).select('educations') as any;
     const obj = user.educations.create(input);
     user.educations.push(obj);
@@ -71,7 +71,7 @@ const MutationImpl = {
   },
 
   updateEducation: async (_, { id, input }, ctx) => {
-    checkEditPermission(_Profile, ctx.user.role);
+    checkEditPermission(_Profile, getRole(ctx));
     const user = await User.findById(ctx.user._id).select('educations') as any;
     const obj = user.educations.id(id);
     obj.set(input);
@@ -80,7 +80,7 @@ const MutationImpl = {
   },
 
   removeEducation: async (_, { id}, ctx) => {
-    checkDeletePermission(_Profile, ctx.user.role);
+    checkDeletePermission(_Profile, getRole(ctx));
     const user = await User.findById(ctx.user._id).select('educations') as any;
     user.educations.pull(id);
     user.save();
@@ -88,7 +88,7 @@ const MutationImpl = {
   },
 
   addJob: async (_, { input }, ctx) => {
-    checkCreatePermission(_Profile, ctx.user.role);
+    checkCreatePermission(_Profile, getRole(ctx));
     const user = await User.findById(ctx.user._id).select('jobs') as any;
     const obj = user.jobs.create(input);
     user.jobs.push(obj);
@@ -97,7 +97,7 @@ const MutationImpl = {
   },
 
   updateJob: async (_, { id, input }, ctx) => {
-    checkEditPermission(_Profile, ctx.user.role);
+    checkEditPermission(_Profile, getRole(ctx));
     const user = await User.findById(ctx.user._id).select('jobs') as any;
     const obj = user.jobs.id(id);
     obj.set(input);
@@ -106,7 +106,7 @@ const MutationImpl = {
   },
 
   removeJob: async (_, { id}, ctx) => {
-    checkDeletePermission(_Profile, ctx.user.role);
+    checkDeletePermission(_Profile, getRole(ctx));
     const user = await User.findById(ctx.user._id).select('jobs') as any;
     user.jobs.pull(id);
     user.save();
@@ -114,27 +114,20 @@ const MutationImpl = {
   },
 
   setPMSendersMode: async (_, { mode }, ctx) => {
-    checkEditPermission(_Profile, ctx.user.role);
+    checkEditPermission(_Profile, getRole(ctx));
     const updated = await User.findByIdAndUpdate(ctx.user._id, { pmsenders: mode });
     return true;
   },
 
   setCommentersMode: async (_, { mode }, ctx) => {
-    checkEditPermission(_Profile, ctx.user.role);
+    checkEditPermission(_Profile, getRole(ctx));
     const updated = await User.findByIdAndUpdate(ctx.user._id, { commenters: mode });
     return true;
   },
 
   updateUser: async (_, { input }, ctx) => {
-    checkEditPermission(_Profile, ctx.user.role);
+    checkEditPermission(_Profile, getRole(ctx));
     const id = ctx.user._id.toString();
-    const login = input['login'];
-    if (login) {
-      const user = await User.findOne({ login });
-      if (user && user._id.toString() !== id) {
-        throw new Error(`User with the same login already exists: ${login}`);
-      }
-    }
     const phone = input['phone'];
     if (phone) {
       const user = await User.findOne({ phone });
@@ -147,13 +140,13 @@ const MutationImpl = {
   },
 
   deleteUser: async (_, { Id }, ctx) => {
-    checkDeletePermission(_Profile, ctx.user.role, Id === ctx.user._id.toString());
+    checkDeletePermission(_Profile, getRole(ctx), Id === ctx.user._id.toString());
     const removed = await User.findByIdAndRemove(Id);
     return removed._id;
   },
 
   followUser: async (_, { userId }, ctx) => {
-    checkEditPermission(_Profile, ctx.user.role);
+    checkEditPermission(_Profile, getRole(ctx));
     const fanId = ctx.user._id;
     const updatedUser = await User.findByIdAndUpdate(userId, { $push: { subscribers: fanId } });
     const updatedFan = await User.findByIdAndUpdate(fanId, { $push: { follows: userId } });
@@ -161,7 +154,7 @@ const MutationImpl = {
   },
 
   unfollowUser: async (_, { userId }, ctx) => {
-    checkEditPermission(_Profile, ctx.user.role);
+    checkEditPermission(_Profile, getRole(ctx));
     const fanId = ctx.user._id;
     const updatedUser = await User.findByIdAndUpdate(userId, { $pull: { subscribers: fanId } });
     const updatedFan = await User.findByIdAndUpdate(fanId, { $pull: { follows: userId } });
@@ -169,13 +162,13 @@ const MutationImpl = {
   },
 
   makeTopUser: async (_, { userId, flag }, ctx) => {
-    checkEditPermission(_Special, ctx.user.role);
+    checkEditPermission(_Special, getRole(ctx));
     const updated = await User.findByIdAndUpdate(userId, { top: flag } );
     return flag;
   },
 
   createPool: async (_, { input }, ctx) => {
-    checkCreatePermission(_Pools, ctx.user.role);
+    checkCreatePermission(_Pools, getRole(ctx));
     // deploy contract
     // save contract's information in db
     const poolName = generatePoolName();
@@ -189,7 +182,7 @@ const MutationImpl = {
   },
 
   createPost: async (_, { input: postData }, ctx) => {
-    checkCreatePermission(_Posts, ctx.user.role);
+    checkCreatePermission(_Posts, getRole(ctx));
     const createdPost = await Post.create(postData);
     await User.findByIdAndUpdate(postData.userId, { $push: { posts: createdPost._id } });
     const post = await Post
@@ -202,22 +195,23 @@ const MutationImpl = {
   },
 
   editPost: async (_, { input }, ctx) => {
-    checkEditPermission(_Posts, ctx.user.role);
+    checkEditPermission(_Posts, getRole(ctx));
     const { postId, ...postData } = input;
     const updatedPost = await Post.findByIdAndUpdate(postId, postData, { new: true });
     return getPostDataForEditResponse(updatedPost);
   },
 
   deletePost: async (_, { id }, ctx) => {
+    const role = getRole(ctx);
     const post = await Post.findById(id).select('userId') as any;
     const equals = post.userId.toString() === ctx.user._id.toString();
-    checkDeletePermission(_Posts, ctx.user.role, equals);
+    checkDeletePermission(_Posts, role, equals);
     post.remove();
     return true;
   },
 
   likePost: async (_, { id, like }, ctx) => {
-    checkEditPermission(_Profile, ctx.user.role);
+    checkEditPermission(_Profile, getRole(ctx));
     const updatedPost = like
             ? await Post.findByIdAndUpdate(id, { $push: { likes: ctx.user._id } }, { new: true }) as any
             : await Post.findByIdAndUpdate(id, { $pull: { likes: ctx.user._id } }, { new: true }) as any
@@ -225,7 +219,7 @@ const MutationImpl = {
   },
 
   pinPost: async (_, {id, pin}, ctx) => {
-    checkEditPermission(_Profile, ctx.user.role);
+    checkEditPermission(_Profile, getRole(ctx));
     const update = (pin) 
             ? await User.findByIdAndUpdate(ctx.user._id, {$set:{ pined_post: id }})
             : await User.findByIdAndUpdate(ctx.user._id, {$unset:{ pined_post: "" }});
@@ -233,7 +227,7 @@ const MutationImpl = {
   },
 
   rePost: async (_, { postId }, ctx) => {
-    checkEditPermission(_Profile, ctx.user.role);
+    checkEditPermission(_Profile, getRole(ctx));
     const repostData = { userId: ctx.user._id, postId };
     const repost = await RePost.create(repostData);
     const updated = await User.findByIdAndUpdate(ctx.user._id, { $push: { reposts: repost._id } }, { new: true })
@@ -242,7 +236,7 @@ const MutationImpl = {
   },
 
   likeRePost: async (_, { id, like }, ctx) => {
-    checkEditPermission(_Profile, ctx.user.role);
+    checkEditPermission(_Profile, getRole(ctx));
     const updated = like
             ? await RePost.findByIdAndUpdate(id, { $push: { likes: ctx.user._id } }, { new: true }) as any
             : await RePost.findByIdAndUpdate(id, { $pull: { likes: ctx.user._id } }, { new: true }) as any
@@ -250,19 +244,19 @@ const MutationImpl = {
   },
 
   deleteRePost: async (_, { id }, ctx) => {
-    checkEditPermission(_Profile, ctx.user.role);
+    checkEditPermission(_Profile, getRole(ctx));
     const removed = await RePost.findByIdAndRemove(id);
     return true;
   },
 
   addImage: async (_, { postId, imageId }, ctx) => {
-    checkEditPermission(_Profile, ctx.user.role);
+    checkEditPermission(_Profile, getRole(ctx));
     const post = await Post.findByIdAndUpdate(postId, { $push: { attachments: imageId } });
     return true;
   },
 
   removeImage: async (_, { postId, imageId, del }, ctx) => {
-    checkEditPermission(_Profile, ctx.user.role);
+    checkEditPermission(_Profile, getRole(ctx));
     const post = await Post.findByIdAndUpdate(postId, { $pull: { attachments: imageId } });
     if(del) {
       await Image.findByIdAndRemove(imageId);
@@ -271,7 +265,7 @@ const MutationImpl = {
   },
 
   createComment: async (_, { postId, content }, ctx) => {
-    checkCreatePermission(_Comments, ctx.user.role);
+    checkCreatePermission(_Comments, getRole(ctx));
     const comment = await Comment.create({ userId: ctx.user._id, postId, content }) as any;
     const user = await User.findById(ctx.user._id).select({ name: 1, login: 1, avatar: 1 }) as any;
     const post = await Post.findByIdAndUpdate(postId, { $push: { comments: comment._id } });
@@ -279,43 +273,43 @@ const MutationImpl = {
   },
 
   editComment: async (_, { cmtId, content }, ctx) => {
-    checkEditPermission(_Comments, ctx.user.role);
+    checkEditPermission(_Comments, getRole(ctx));
     const updated = await Comment.findByIdAndUpdate(cmtId, content, { new: true });
     return updated._id;
   },
 
   deleteComment: async (_, { cmtId }, ctx) => {
-    checkDeletePermission(_Comments, ctx.user.role);
+    checkDeletePermission(_Comments, getRole(ctx));
     const removed = await Comment.findByIdAndRemove(cmtId);
     return removed._id;
   },
 
   createContract: async (_, { input }, ctx) => {
-    checkCreatePermission(_Contracts, ctx.user.role);
+    checkCreatePermission(_Contracts, getRole(ctx));
     const contract = await Contract.create(input);
     return contract._id;
   },
   
   deployContract: async (_, { name, input }, ctx) => {
-    checkEditPermission(_Contracts, ctx.user.role);
+    checkEditPermission(_Contracts, getRole(ctx));
     const data = await deployContract(name, input);
     return data;
   },
 
   deleteContract: async (_, { Id }, ctx) => {
-    checkDeletePermission(_Contracts, ctx.user.role);
+    checkDeletePermission(_Contracts, getRole(ctx));
     const contract = await Contract.findByIdAndRemove(Id);
     return contract._id;
   },
 
   createNews: async (_, { title }, ctx) => {
-    checkCreatePermission(_News, ctx.user.role);
+    checkCreatePermission(_News, getRole(ctx));
     const createdNews = await News.create({ title });
     return createdNews._id;
   },
 
   deleteNews: async (_, { newsId }, ctx) => {
-    checkDeletePermission(_News, ctx.user.role);
+    checkDeletePermission(_News, getRole(ctx));
     const deletedNews = await News.findByIdAndRemove(newsId);
     return deletedNews._id;
   },

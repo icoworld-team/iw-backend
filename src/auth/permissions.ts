@@ -1,12 +1,27 @@
 import { notNull } from '../util/common';
 import { IWError } from '../util/IWError';
 import { DEV_MODE } from '../util/config';
+import { ApolloError } from 'apollo-server-koa';
 
 // No permissions message.
 const NO_PERMISSIONS = 'You has NOT enough permissions to complete the request!';
+const NO_AUTH = 'You must be logged in to invoke this method!';
+
+class PermissionsError extends ApolloError {
+    constructor(msg = NO_PERMISSIONS, code = '405') {
+        super(msg, code);
+    }
+}
+
+class AuthError extends ApolloError {
+    constructor(msg = NO_AUTH, code = '401') {
+        super(msg, code);
+    }
+}
 
 // Available permissions.
 const Permissions = new function() {
+    this.Z = 0;  // No access
     this.R = 1;  // Read
     this.W = 2;  // Create
     this.E = 4;  // Edit
@@ -28,20 +43,20 @@ export const _Special = 8;
 // Roles permissions schema
 const Schema = {
     'Guest': {
-        'Registration': Permissions.R | Permissions.W,
-        'Profile': Permissions.R,
-        'Posts': Permissions.R,
-        'News': Permissions.R,
-        'Comments': Permissions.R,
-        'Pools': Permissions.R,
-        'Contracts': Permissions.R
+        'Registration': Permissions.Z,
+        'Profile': Permissions.Z,
+        'Posts': Permissions.Z,
+        'News': Permissions.Z,
+        'Comments': Permissions.Z,
+        'Pools': Permissions.Z,
+        'Contracts': Permissions.Z
     },
     'User': {
         'Registration': Permissions.R | Permissions.E,
-        'Profile': Permissions.R | Permissions.E,
-        'Posts': Permissions.R | Permissions.W | Permissions.E,
+        'Profile': Permissions.R | Permissions.E | Permissions.D,
+        'Posts': Permissions.R | Permissions.W | Permissions.E | Permissions.D,
         'News': Permissions.R,
-        'Comments': Permissions.R | Permissions.W | Permissions.E,
+        'Comments': Permissions.R | Permissions.W | Permissions.E | Permissions.D,
         'Chats': Permissions.R | Permissions.W,
         'Pools': Permissions.R | Permissions.W,
         'Contracts': Permissions.R | Permissions.W,
@@ -67,8 +82,10 @@ export const Roles = {
     Admin: _array[2]
 }
 
-export const GuestUser = {
-    role: Roles.Guest
+export function getRole(ctx) {
+    if(!ctx.user)
+        throw new AuthError();
+    return ctx.user.role;   
 }
 
 function hasRole(role) {
@@ -162,7 +179,7 @@ export function hasModeratePermission(section: number, role: string): boolean {
  */
 export function checkReadPermission(section: number, role: string): void {
     if(!hasReadPermission(section, role))
-        throw new IWError(405, NO_PERMISSIONS);
+        throw new PermissionsError();
 }
 
 /**
@@ -172,7 +189,7 @@ export function checkReadPermission(section: number, role: string): void {
  */
 export function checkCreatePermission(section: number, role: string): void {
     if(!hasCreatePermission(section, role))
-        throw new IWError(405, NO_PERMISSIONS);
+        throw new PermissionsError();
 }
 
 /**
@@ -182,7 +199,7 @@ export function checkCreatePermission(section: number, role: string): void {
  */
 export function checkEditPermission(section: number, role: string): void {
     if(!hasEditPermission(section, role))
-        throw new IWError(405, NO_PERMISSIONS);
+        throw new PermissionsError();
 }
 
 /**
@@ -195,7 +212,7 @@ export function checkDeletePermission(section: number, role: string, sameIds: bo
          ? hasDeletePermission(section, role)
          : hasModeratePermission(section, role);
     if(!hasPerm)     
-        throw new IWError(405, NO_PERMISSIONS);
+        throw new PermissionsError();
 }
 
 /**
@@ -205,5 +222,5 @@ export function checkDeletePermission(section: number, role: string, sameIds: bo
  */
 export function checkModeratePermission(section: number, role: string): void {
     if(!hasModeratePermission(section, role))
-        throw new IWError(405, NO_PERMISSIONS);
+        throw new PermissionsError();
 }
