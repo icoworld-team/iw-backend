@@ -312,12 +312,6 @@ const QueryImpl = {
     const result = await sendTextEMail(ADMIN_EMAIL, title, content);
     return result;
   },
-
-  sendEmail: async (_, {addr, title, content}, ctx) => {
-    checkReadPermission(_Profile, getRole(ctx));
-    const result = await sendTextEMail(addr, title, content);
-    return result;
-  },
 }
 
 function getRepostsMap(reposts:Array<any>):Map<string,any> {
