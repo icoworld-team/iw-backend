@@ -12,6 +12,7 @@ import Comment, {getCommentData} from "../models/Comment";
 import RePost from "../models/RePost";
 import Image from "../models/Image";
 import News from "../models/News";
+import { setAwaitsConfirmation, sendMailOnUpdatedEmail } from '../auth/emailConfirm';
 
 // Upload path value.
 const UPLOAD_PATH = path.join(STATIC_ROOT, 'images');
@@ -136,6 +137,12 @@ const MutationImpl = {
       }
     }
     const updatedUser = await User.findByIdAndUpdate(id, input, { new: true });
+    // if email has beem changed, reset the confirmation and send the mail on updated email
+    const email = input['email'];
+    if (email) {
+      await setAwaitsConfirmation(id);
+      sendMailOnUpdatedEmail(updatedUser);
+    }
     return updatedUser;
   },
 
