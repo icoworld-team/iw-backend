@@ -230,9 +230,9 @@ const MutationImpl = {
     checkEditPermission(_Profile, getRole(ctx));
     const repostData = { userId: ctx.user._id, postId };
     const repost = await RePost.create(repostData);
-    const updated = await User.findByIdAndUpdate(ctx.user._id, { $push: { reposts: repost._id } }, { new: true })
-      .select('reposts') as any;
-    return updated.reposts.length;
+    const post = Post.findByIdAndUpdate(postId, {$inc: {reposted: 1}}, { new: true }).select('reposted') as any;
+    await User.findByIdAndUpdate(ctx.user._id, { $push: { reposts: repost._id } });
+    return post.reposted;
   },
 
   likeRePost: async (_, { id, like }, ctx) => {
@@ -245,8 +245,10 @@ const MutationImpl = {
 
   deleteRePost: async (_, { id }, ctx) => {
     checkEditPermission(_Profile, getRole(ctx));
-    const removed = await RePost.findByIdAndRemove(id);
-    return true;
+    const repost = await RePost.findById(id).select('postId') as any;
+    const post = Post.findByIdAndUpdate(repost.postId, {$dec: {reposted: 1}}, { new: true }).select('reposted') as any;
+    await repost.remove();
+    return post.reposted;
   },
 
   addImage: async (_, { postId, imageId }, ctx) => {
