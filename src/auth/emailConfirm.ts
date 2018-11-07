@@ -46,6 +46,22 @@ export async function sendMail(user) {
 }
 
 /**
+ * Send email by updating user's email
+ * @param user 
+ */
+export async function sendMailOnUpdatedEmail(user) {
+    const hash = encrypt(user._id.toString());
+    const url = `${BASE_URL}/confirmEmail/${hash}`;
+    const body =
+        `<h1>You have changed your email!</h1>
+      <span>Please confirm your new email address:</span>
+      <a href="${url}">${url}</a>`;
+
+    const result = await sendHtmlEMail(user.email, title, body);
+    return result;
+}
+
+/**
  * Set 'awaits confirmation' status for given userId.
  * @param userId 
  */

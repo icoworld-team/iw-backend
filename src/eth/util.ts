@@ -3,10 +3,14 @@ import { notNull } from '../util/common';
 
 // ETH node URL.
 export const ethUrl = process.env.ETH_NODE_URL || 'http://icoworld.projects.oktend.com:8545';
-
 // Create a web3 connection
 const web3 = new Web3();
-web3.setProvider(new Web3.providers.HttpProvider(ethUrl));
+try {
+    web3.setProvider(new Web3.providers.HttpProvider(ethUrl));
+} catch (error) {
+    console.log('Failed to connect to etherium node');
+    console.log(error);
+}
 
 export default web3;
 

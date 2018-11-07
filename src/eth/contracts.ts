@@ -3,7 +3,7 @@ import web3, {ethUrl} from './util';
 import { notNull, sleep } from '../util/common';
 
 // Defintion of 'from' address.
-const accountAddr = process.env.ETH_FROM_ACCOUNT || web3.eth.coinbase;
+const accountAddr = process.env.ETH_FROM_ACCOUNT; //  || web3.eth.coinbase;
 // Default price.
 const priceGas = process.env.ETH_DEPLOY_PRICE || 100000;
 // Default wait for block timeout.
