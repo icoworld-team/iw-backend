@@ -266,6 +266,7 @@ const Types = gql(`
         content: String!
         reposted: Int
         tags: [String!]!
+        attachments: [ID]
         reposted_date: String
         likes: [ID]
     }
