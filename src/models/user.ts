@@ -22,6 +22,10 @@ const schema = new Schema({
         type: Buffer,  
         required: true
     },
+    pwdUpdatedAt: {
+        type: Date,
+        default: Date.now
+    },
     email: {
         type: String,
         required: true,
@@ -170,6 +174,7 @@ export function getUserData(user) {
         name: user.name,
         login: user.login,
         email: user.email,
+        pwdUpdatedAt: user.pwdUpdatedAt,
         role: user.role,
         permissions: getPermission(user.role),
         phone: user.phone,
