@@ -213,7 +213,7 @@ const MutationImpl = {
     const post = await Post.findById(id).select('userId') as any;
     const equals = post.userId.toString() === ctx.user._id.toString();
     checkDeletePermission(_Posts, role, equals);
-    post.remove();
+    await post.remove();
     return true;
   },
 
@@ -237,7 +237,7 @@ const MutationImpl = {
     checkEditPermission(_Profile, getRole(ctx));
     const repostData = { userId: ctx.user._id, postId };
     const repost = await RePost.create(repostData);
-    const post = Post.findByIdAndUpdate(postId, {$inc: {reposted: 1}}, { new: true }).select('reposted') as any;
+    const post = await Post.findByIdAndUpdate(postId, {$inc: {reposted: 1}}, { new: true }).select('reposted') as any;
     await User.findByIdAndUpdate(ctx.user._id, { $push: { reposts: repost._id } });
     return post.reposted;
   },
