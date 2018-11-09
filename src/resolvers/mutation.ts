@@ -253,7 +253,7 @@ const MutationImpl = {
   deleteRePost: async (_, { id }, ctx) => {
     checkEditPermission(_Profile, getRole(ctx));
     const repost = await RePost.findById(id).select('postId') as any;
-    const post = Post.findByIdAndUpdate(repost.postId, {$dec: {reposted: 1}}, { new: true }).select('reposted') as any;
+    const post = await Post.findByIdAndUpdate(repost.postId, {$dec: {reposted: 1}}, { new: true }).select('reposted') as any;
     await repost.remove();
     return post.reposted;
   },
