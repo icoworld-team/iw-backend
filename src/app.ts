@@ -197,17 +197,17 @@ router.post('/changePassword', async (ctx, next) => {
     const valid = await verify(oldPassword, user.pwd);
     if (!valid) {
         ctx.status = 403;
-        ctx.body = 'Old password is incorrect';
+        ctx.body = { error: 'Old password is incorrect' };
         return;
     }
     if (newPassword === '') {
         ctx.status = 403;
-        ctx.body = 'Password can not be blank';
+        ctx.body = { error: 'Password can not be blank' };
         return;
     }
     if (newPassword !== repeatedNewPassword) {
         ctx.status = 403;
-        ctx.body = 'Passwords are not matched';
+        ctx.body = { error: 'Passwords are not matched' };
         return;
     }
     const pwd = await hash(newPassword);
