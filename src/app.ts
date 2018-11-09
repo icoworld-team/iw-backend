@@ -190,11 +190,16 @@ router.post('/changePassword', async (ctx, next) => {
     if (ctx.isUnauthenticated()) {
         ctx.throw(401, 'Unauthorized access');
     }
-    const { oldPassword, newPassword, repeatedNewPassword } = ctx.request.body as any;
+    let { oldPassword, newPassword, repeatedNewPassword } = ctx.request.body as any;
+    newPassword = newPassword.trim();
+    repeatedNewPassword = repeatedNewPassword.trim();
     const user = ctx.state.user;
     const valid = await verify(oldPassword, user.pwd);
     if (!valid) {
         ctx.throw(403, 'Old password is incorrect');
+    }
+    if (newPassword === '') {
+        ctx.throw(403, 'Password can not be blank');
     }
     if (newPassword !== repeatedNewPassword) {
         ctx.throw(403, 'Passwords are not matched');
