@@ -31,7 +31,7 @@ services:
       env_file:
         - "/var/icoworld/app.env"
       image: ico/backend:staging-$BUILD_ID
-      container_name: backend-$BUILD_ID
+      container_name: backend
       volumes:
         - "/var/static/images:/app/static/images/:rw"
       networks:
