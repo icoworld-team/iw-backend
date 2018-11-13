@@ -30,8 +30,8 @@ services:
       build: .
       env_file:
         - "/var/icoworld/app.env"
-      image: ico/backend:staging
-      container_name: backend
+      image: ico/backend:staging-$BUILD_ID
+      container_name: backend-$BUILD_ID
       volumes:
         - "/var/static/images:/app/static/images/:rw"
       networks:
