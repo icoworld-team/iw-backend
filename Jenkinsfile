@@ -10,7 +10,7 @@ pipeline {
     stage('Deploy to staging') {
       steps {
         sh('''#!/bin/bash
-          ssh utah@icoworld.network -t '/home/utah/deploy-backend.sh BUILD_ID=$BUILD_ID'
+          ssh utah@icoworld.network -t /home/utah/deploy-backend.sh BUILD_ID=$BUILD_ID exec bash
           ''')
       }
     }
