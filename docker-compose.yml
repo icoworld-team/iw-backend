@@ -1,7 +1,7 @@
 version: '2' 
 
 networks:
-  efk_hostnet:
+  hostnet:
     external: true
 
 services:
@@ -22,7 +22,7 @@ services:
         fluentd-address: 172.18.0.10:24224
         tag: mongo.log
     networks:
-      efk_hostnet:
+      hostnet:
         ipv4_address: 172.18.0.112
     #command: mongod --bind_ip 0.0.0.0
   
@@ -35,7 +35,7 @@ services:
       volumes:
         - "/var/static/images:/app/static/images/:rw"
       networks:
-        efk_hostnet:
+        hostnet:
           ipv4_address: 172.18.0.113 
       ports:
         - "3000:3000"
