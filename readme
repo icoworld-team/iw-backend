@@ -10,4 +10,6 @@ In order to run the application you need:
 3. Run the project:
     1. via npm 'npm run start'
     2. or directly: 'node build/server.js'.    
+
+test
     
