@@ -59,7 +59,7 @@ const Mutation = gql(`
         pinPost(id: ID!, pin: Boolean!): ID!
         rePost(postId: ID!): Int!
         likeRePost(id: ID!, like: Boolean!): Int!
-        deleteRePost(id: ID!): Int!
+        deleteRePost(id: ID!): Boolean!
         addImage(postId: ID, imageId: ID): Boolean!
         removeImage(postId: ID, imageId: ID, del: Boolean): Boolean!
         createComment(postId: ID!, content: String!): Comment!

@@ -289,8 +289,10 @@ const MutationImpl = {
 
   deleteComment: async (_, { cmtId }, ctx) => {
     checkDeletePermission(_Comments, getRole(ctx));
-    const removed = await Comment.findByIdAndRemove(cmtId);
-    return removed._id;
+    const comment = await Comment.findById(cmtId) as any;
+    await Post.findByIdAndUpdate(comment.postId, { $pull: { comments: cmtId } });
+    await comment.remove();
+    return true;
   },
 
   createContract: async (_, { input }, ctx) => {
