@@ -163,7 +163,7 @@ router.post('/login', async (ctx, next) => {
 // Logout request handler.
 router.get('/logout', async (ctx) => {
     await ctx.logout();
-    ctx.body = 'logout';
+    ctx.body = { logout: true };
 });
 
 router.get('/confirmEmail/:hash', async (ctx) => {
