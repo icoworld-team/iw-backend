@@ -109,6 +109,7 @@ const Types = gql(`
         name: String!
         login: String
         email: String!
+        pwdUpdatedAt: String
         phone: String
         photo: ID
         avatar: ID
@@ -233,6 +234,7 @@ const Types = gql(`
         date: String
         edited: String
         content: String!
+        reposted: Int
         comments: [ID]
         likes: [ID]
         tags: [String!]!
@@ -263,8 +265,10 @@ const Types = gql(`
         date: String
         edited: String
         content: String!
+        reposted: Int
         tags: [String!]!
-        reposted: String
+        attachments: [ID]
+        reposted_date: String
         likes: [ID]
     }
 

@@ -12,6 +12,7 @@ import Comment, {getCommentData} from "../models/Comment";
 import RePost from "../models/RePost";
 import Image from "../models/Image";
 import News from "../models/News";
+import { setAwaitsConfirmation, sendMailOnUpdatedEmail } from '../auth/emailConfirm';
 
 // Upload path value.
 const UPLOAD_PATH = path.join(STATIC_ROOT, 'images');
@@ -136,6 +137,12 @@ const MutationImpl = {
       }
     }
     const updatedUser = await User.findByIdAndUpdate(id, input, { new: true });
+    // if email has beem changed, reset the confirmation and send the mail on updated email
+    const email = input['email'];
+    if (email) {
+      await setAwaitsConfirmation(id);
+      sendMailOnUpdatedEmail(updatedUser);
+    }
     return updatedUser;
   },
 
@@ -206,7 +213,7 @@ const MutationImpl = {
     const post = await Post.findById(id).select('userId') as any;
     const equals = post.userId.toString() === ctx.user._id.toString();
     checkDeletePermission(_Posts, role, equals);
-    post.remove();
+    await post.remove();
     return true;
   },
 
@@ -230,9 +237,9 @@ const MutationImpl = {
     checkEditPermission(_Profile, getRole(ctx));
     const repostData = { userId: ctx.user._id, postId };
     const repost = await RePost.create(repostData);
-    const updated = await User.findByIdAndUpdate(ctx.user._id, { $push: { reposts: repost._id } }, { new: true })
-      .select('reposts') as any;
-    return updated.reposts.length;
+    const post = await Post.findByIdAndUpdate(postId, {$inc: {reposted: 1}}, { new: true }).select('reposted') as any;
+    await User.findByIdAndUpdate(ctx.user._id, { $push: { reposts: repost._id } });
+    return post.reposted;
   },
 
   likeRePost: async (_, { id, like }, ctx) => {
@@ -245,8 +252,10 @@ const MutationImpl = {
 
   deleteRePost: async (_, { id }, ctx) => {
     checkEditPermission(_Profile, getRole(ctx));
-    const removed = await RePost.findByIdAndRemove(id);
-    return true;
+    const repost = await RePost.findById(id).select('postId') as any;
+    const post = await Post.findByIdAndUpdate(repost.postId, {$inc: {reposted: -1}}, { new: true }).select('reposted') as any;
+    await repost.remove();
+    return post.reposted;
   },
 
   addImage: async (_, { postId, imageId }, ctx) => {
@@ -280,8 +289,10 @@ const MutationImpl = {
 
   deleteComment: async (_, { cmtId }, ctx) => {
     checkDeletePermission(_Comments, getRole(ctx));
-    const removed = await Comment.findByIdAndRemove(cmtId);
-    return removed._id;
+    const comment = await Comment.findById(cmtId) as any;
+    await Post.findByIdAndUpdate(comment.postId, { $pull: { comments: cmtId } });
+    await comment.remove();
+    return true;
   },
 
   createContract: async (_, { input }, ctx) => {

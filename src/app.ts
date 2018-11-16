@@ -186,6 +186,36 @@ router.post('/sendEmail', async (ctx, next) => {
     ctx.body = result;
 });
 
+router.post('/changePassword', async (ctx, next) => {
+    if (ctx.isUnauthenticated()) {
+        ctx.throw(401, 'Unauthorized access');
+    }
+    let { oldPassword, newPassword, repeatedNewPassword } = ctx.request.body as any;
+    newPassword = newPassword.trim();
+    repeatedNewPassword = repeatedNewPassword.trim();
+    const user = ctx.state.user;
+    const valid = await verify(oldPassword, user.pwd);
+    if (!valid) {
+        ctx.status = 403;
+        ctx.body = { error: 'Old password is incorrect' };
+        return;
+    }
+    if (newPassword === '') {
+        ctx.status = 403;
+        ctx.body = { error: 'Password can not be blank' };
+        return;
+    }
+    if (newPassword !== repeatedNewPassword) {
+        ctx.status = 403;
+        ctx.body = { error: 'Passwords are not matched' };
+        return;
+    }
+    const pwd = await hash(newPassword);
+    const pwdUpdatedAt = new Date();
+    await User.findByIdAndUpdate(user.id, { pwd, pwdUpdatedAt });
+    ctx.body = pwdUpdatedAt;
+});
+
 router.get('/', async (ctx: Koa.Context) => {
     ctx.body = 'icoWorld'
 })
