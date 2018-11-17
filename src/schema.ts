@@ -294,6 +294,8 @@ const Types = gql(`
         country: String
         followersRangeFilter: FollowersRangeFilter
         sortBy: SORTING_PARAMS
+        skip: Int!
+        limit: Int!
     }
 
     input FollowersRangeFilter {

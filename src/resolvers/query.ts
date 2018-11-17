@@ -149,11 +149,12 @@ const QueryImpl = {
 
   getInvestors: async (_, { input }, ctx) => {
     checkReadPermission(_Profile, getRole(ctx));
-    const { sortBy, ...filterParams } = input;
+    const { sortBy, skip, limit, ...filterParams } = input;
     const params = investors.generateSearchingParams(filterParams);
-    const users = await User
-      .find(params)
-      .select({ name: 1, subscribers: 1, login: 1, avatar: 1, createdAt: 1 });
+    const users = await User.find(params)
+      .select('name subscribers login avatar createdAt')
+      .skip(skip)
+      .limit(limit);
     const sorted = investors.sort(users, sortBy);
     return sorted.map(user => investors.format(user));
   },
