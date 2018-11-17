@@ -13,10 +13,10 @@ export const STATIC_ROOT = path.join(process.env.STATIC_PATH || process.cwd(),'s
 // Session keys value.
 export const SESSION_KEYS = process.env.SESSION_KEYS || '97Jix8Mcc4G+CD02iunYB6sZTjXxQfks';
 // Session max age (ms)
-export const SESSION_TIMEOUT = parseInt(process.env.SESSION_TIMEOUT) || 1800000;
+export const SESSION_TIMEOUT = parseInt(process.env.SESSION_TIMEOUT) || 86400000;
 // Max uploaded file size
-export const UPLOAD_MAX_SIZE = parseInt(process.env.UPLOAD_MAX_SIZE || '2500000');
+export const UPLOAD_MAX_SIZE = parseInt(process.env.UPLOAD_MAX_SIZE )|| 2500000;
 // Max files to upload
-export const UPLOAD_MAX_FILES = parseInt(process.env.UPLOAD_MAX_FILES || '10');
+export const UPLOAD_MAX_FILES = parseInt(process.env.UPLOAD_MAX_FILES) || 10;
 // Administrator email address.
 export const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'address@mail.org';
