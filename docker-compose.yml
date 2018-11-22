@@ -16,6 +16,8 @@ services:
       - "/var/icoworld/mongo.env/"
     restart: on-failure
     container_name: database
+    expose:
+      - "27017"
     logging:
       driver: "fluentd"
       options:
