@@ -63,27 +63,30 @@ const QueryImpl = {
     return post ? getPostData(post) : null;
   },
 
-  searchPost: async (_, { searchText }, ctx) => {
+  searchPost: async (_, { searchText, skip, limit }, ctx) => {
     checkReadPermission(_Posts, getRole(ctx));
     const posts = await Post
       .find({ content: new RegExp(`.*${searchText}.*`, 'i') })
       .populate({
         path: 'userId',
         select: 'name login avatar'
-      });
+      })
+      .skip(skip)
+      .limit(limit);
     return posts.map((post => getPostData(post)));
   },
 
-  searchPostInProfile: async (_, { userId, searchText }, ctx) => {
+  searchPostInProfile: async (_, { userId, searchText, skip, limit }, ctx) => {
     checkReadPermission(_Posts, getRole(ctx));
     const user = await User.findById(userId).select('posts reposts') as any;
     const posts = await Post.find({ content: new RegExp(`.*${searchText}.*`, 'i') }).where('_id').in(user.posts)
       .populate({
         path: 'userId',
         select: 'name login avatar'
-      });    
+      })
+      .skip(skip)
+      .limit(limit);    
     const mappedPosts = posts.map(post => getPostData(post));
-
     const reposts = await RePost.find().where('_id').in(user.reposts).select('_id postId date likes') as any;
     const repsMap:Map<string, any> = getRepostsMap(reposts);
     const ids = Array.from(repsMap.keys());
@@ -91,7 +94,9 @@ const QueryImpl = {
       .populate({
         path: 'userId',
         select: 'name login avatar'
-      });
+      })
+      .skip(skip)
+      .limit(limit);
     const mappedReposted = repostedPosts.map(post => getRepostData(post, repsMap.get(post._id.toString())));
 
     return {
@@ -114,14 +119,16 @@ const QueryImpl = {
     return posts.map(post => getRepostData(post, repsMap.get(post._id.toString())));
   },
 
-  searchInFollowsPosts: async (_, { userId, txt }, ctx) => {
+  searchInFollowsPosts: async (_, { userId, txt, skip, limit }, ctx) => {
     checkReadPermission(_Posts, getRole(ctx));
     const user = await User.findById(userId).select('follows') as any;
     const posts = await Post.find({ content: new RegExp(`.*${txt}.*`, 'i') }).where('userId').in(user.follows)
     .populate({
       path: 'userId',
       select: 'name login avatar'
-    });
+    })
+    .skip(skip)
+    .limit(limit);
     return posts.map(post => getPostData(post));
   },
 

@@ -14,11 +14,11 @@ const Query = gql(`
         getPools(userId: ID!): [Pool]!
         searchPool(poolName: String!): [PoolInfo!]!
         getPost(postId: ID!): Post
-        searchPost(searchText: String!): [Post!]!
-        searchPostInProfile(userId: ID!, searchText: String!): SearchPostInProfileResponse!
-        getReposts(userId: ID!): [Post]!
-        searchInFollowsPosts(userId: ID!, txt: String!): [Post]!
+        searchPost(searchText: String!, skip: Int!, limit: Int!): [Post!]!
+        searchPostInProfile(userId: ID!, searchText: String!, skip: Int!, limit: Int!): SearchPostInProfileResponse!
+        searchInFollowsPosts(userId: ID!, txt: String!, skip: Int!, limit: Int!): [Post]!
         getFollowsPosts(userId: ID!): [Post]!
+        getReposts(userId: ID!): [Post]!
         getComments(postId: ID!): [Comment]!
         getInvestors(input: InvestorsFilterParamsInput!): [Investor!]!
         getContracts(input: ContractsParamsInput!): [Contract]!
