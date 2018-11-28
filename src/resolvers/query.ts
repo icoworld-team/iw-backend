@@ -71,6 +71,7 @@ const QueryImpl = {
         path: 'userId',
         select: 'name login avatar'
       })
+      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
     return posts.map((post => getPostData(post)));
@@ -84,6 +85,7 @@ const QueryImpl = {
         path: 'userId',
         select: 'name login avatar'
       })
+      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);    
     const mappedPosts = posts.map(post => getPostData(post));
@@ -95,6 +97,7 @@ const QueryImpl = {
         path: 'userId',
         select: 'name login avatar'
       })
+      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
     const mappedReposted = repostedPosts.map(post => getRepostData(post, repsMap.get(post._id.toString())));
@@ -127,6 +130,7 @@ const QueryImpl = {
       path: 'userId',
       select: 'name login avatar'
     })
+    .sort({ createdAt: -1 })
     .skip(skip)
     .limit(limit);
     return posts.map(post => getPostData(post));
