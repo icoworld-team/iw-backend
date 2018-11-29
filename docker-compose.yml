@@ -49,7 +49,7 @@ services:
           SENDER_EMAIL_PASS: "123456@@"
           NODE_ENV: "development"
       image: ico/backend:$BUILD_ID
-      container_name: backend-$BUILD_ID
+      container_name: backend
       volumes:
         - "/var/static/images:/app/static/images/:rw"
       ports:
