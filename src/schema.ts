@@ -222,6 +222,7 @@ const Types = gql(`
     input PostInput {
         userId: ID!
         content: String!
+        contentJson: String
         tags: [String!]
     }
     
@@ -234,6 +235,7 @@ const Types = gql(`
         date: String
         edited: String
         content: String!
+        contentJson: String!
         reposted: Int
         comments: [ID]
         likes: [ID]

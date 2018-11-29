@@ -11,6 +11,7 @@ const schema = new Schema({
         required: true
     },
     content: String,
+    contentJson: String,
     reposted: {
         type: Number,
         default: 0
@@ -41,6 +42,7 @@ export function getPostData(post) {
         date: post.createdAt,
         edited: post.updatedAt,
         content: post.content,
+        contentJson: post.contentJson,
         reposted: post.reposted,
         comments: post.comments,
         likes: post.likes,
