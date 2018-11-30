@@ -52,6 +52,7 @@ pipeline {
     stage('Deploy') {
       steps {
         sh('''#!/bin/bash
+          docker rm -f backend && \\
           docker-compose stop app && \\
           docker-compose up -d --force-recreate app
           ''')
