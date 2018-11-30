@@ -16,7 +16,7 @@ pipeline {
     stage('Start database') {
       steps{
         echo "Starting db..."
-        sh 'docker-compose up -d db'
+        sh 'docker-compose up -d db || echo "The container name "/database" is already in use"'
       }
     }
 
