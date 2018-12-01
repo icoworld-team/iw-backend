@@ -235,7 +235,7 @@ const Types = gql(`
         date: String
         edited: String
         content: String!
-        contentJson: String!
+        contentJson: String
         reposted: Int
         comments: [ID]
         likes: [ID]
@@ -248,12 +248,14 @@ const Types = gql(`
         userId: ID!
         date: String
         content: String!
+        contentJson: String
         tags: [String!]!
     }
     
     input PostEditInput {
         postId: ID!,
         content: String!
+        contentJson: String
         tags: [String!]
     }
 

@@ -59,6 +59,7 @@ export function getPostDataForEditResponse(post) {
         date: post.createdAt,
         edited: post.updatedAt,
         content: post.content,
+        contentJson: post.contentJson,
         reposted: post.reposted,
         comments: post.comments,
         likes: post.likes,
