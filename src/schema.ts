@@ -269,6 +269,7 @@ const Types = gql(`
         date: String
         edited: String
         content: String!
+        contentJson: String
         reposted: Int
         tags: [String!]!
         attachments: [ID]
