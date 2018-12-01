@@ -11,7 +11,6 @@ pipeline {
       steps {
         sh('''#!/bin/bash
           ssh utah@icoworld.network /home/utah/deploy-backend.sh 
-          ''')
       }
     }
   }

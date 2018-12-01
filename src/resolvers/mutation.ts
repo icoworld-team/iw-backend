@@ -283,7 +283,7 @@ const MutationImpl = {
 
   editComment: async (_, { cmtId, content }, ctx) => {
     checkEditPermission(_Comments, getRole(ctx));
-    const updated = await Comment.findByIdAndUpdate(cmtId, content, { new: true });
+    const updated = await Comment.findByIdAndUpdate(cmtId, {content}, { new: true });
     return updated._id;
   },
 

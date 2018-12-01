@@ -35,6 +35,7 @@ export function getRepostData(post, value) {
         date: post.createdAt,
         edited: post.updatedAt,
         content: post.content,
+        contentJson: post.contentJson,
         reposted: post.reposted,
         tags: post.tags,
         attachments: post.attachments,

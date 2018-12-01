@@ -14,11 +14,11 @@ const Query = gql(`
         getPools(userId: ID!): [Pool]!
         searchPool(poolName: String!): [PoolInfo!]!
         getPost(postId: ID!): Post
-        searchPost(searchText: String!): [Post!]!
-        searchPostInProfile(userId: ID!, searchText: String!): SearchPostInProfileResponse!
-        getReposts(userId: ID!): [Post]!
-        searchInFollowsPosts(userId: ID!, txt: String!): [Post]!
+        searchPost(searchText: String!, skip: Int!, limit: Int!): [Post!]!
+        searchPostInProfile(userId: ID!, searchText: String!, skip: Int!, limit: Int!): SearchPostInProfileResponse!
+        searchInFollowsPosts(userId: ID!, txt: String!, skip: Int!, limit: Int!): [Post]!
         getFollowsPosts(userId: ID!): [Post]!
+        getReposts(userId: ID!): [Post]!
         getComments(postId: ID!): [Comment]!
         getInvestors(input: InvestorsFilterParamsInput!): [Investor!]!
         getContracts(input: ContractsParamsInput!): [Contract]!
@@ -222,6 +222,7 @@ const Types = gql(`
     input PostInput {
         userId: ID!
         content: String!
+        contentJson: String
         tags: [String!]
     }
     
@@ -234,6 +235,7 @@ const Types = gql(`
         date: String
         edited: String
         content: String!
+        contentJson: String
         reposted: Int
         comments: [ID]
         likes: [ID]
@@ -246,12 +248,14 @@ const Types = gql(`
         userId: ID!
         date: String
         content: String!
+        contentJson: String
         tags: [String!]!
     }
     
     input PostEditInput {
         postId: ID!,
         content: String!
+        contentJson: String
         tags: [String!]
     }
 
@@ -265,6 +269,7 @@ const Types = gql(`
         date: String
         edited: String
         content: String!
+        contentJson: String
         reposted: Int
         tags: [String!]!
         attachments: [ID]
@@ -294,6 +299,8 @@ const Types = gql(`
         country: String
         followersRangeFilter: FollowersRangeFilter
         sortBy: SORTING_PARAMS
+        skip: Int!
+        limit: Int!
     }
 
     input FollowersRangeFilter {
