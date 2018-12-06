@@ -34,6 +34,7 @@ services:
         - "/var/icoworld/app.env"
       image: ico/backend:staging-$BUILD_ID
       container_name: backend
+      restart: on_faile
       volumes:
         - "/var/static/images:/app/static/images/:rw"
       networks:
